@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Жанры — CineVault</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<header class="header">
+  <div class="header-left">
+    <div class="menu-wrap">
+      <button class="burger-btn" id="burgerBtn">☰</button>
+      <div class="menu-dropdown" id="menuDropdown">
+        <a href="/account.html" class="menu-item">👤 Мой профиль</a>
+        <div class="menu-divider"></div>
+        <a href="#" class="menu-item danger" onclick="logout();return false">🚪 Выйти</a>
+      </div>
+    </div>
+  </div>
+  <a href="/index.html" class="header-logo">🎬 CineVault</a>
+  <div class="header-right">
+    <div class="header-search">
+      <span>🔍</span>
+      <input type="text" id="headerSearch" placeholder="Поиск...">
+    </div>
+    <a href="/auth.html" class="btn btn-primary btn-sm" id="authBtn">Войти</a>
+  </div>
+</header>
+
+<main class="page">
+  <div class="container" style="padding-top:32px">
+    <a href="/index.html" class="back-btn" style="margin-bottom:20px">← На главную</a>
+    <h1 style="font-size:2rem;font-weight:800;margin-bottom:8px">Жанры</h1>
+    <p style="color:var(--txt2);margin-bottom:32px">Выберите жанр, чтобы найти подходящие фильмы</p>
+    <div class="genres-grid" id="genresGrid"></div>
+
+    <div id="genreMoviesSection" style="display:none;margin-top:48px">
+      <h2 class="section-title" id="genreTitle"></h2>
+      <div class="movie-grid" id="genreMoviesGrid"></div>
+    </div>
+  </div>
+</main>
+
+<script src="/js/data.js"></script>
+<script>
+const user = getCurrentUser();
+if(user) document.getElementById('authBtn').outerHTML=`<a href="/account.html" class="btn btn-ghost btn-sm">👤 ${user.name}</a>`;
+document.getElementById('burgerBtn').addEventListener('click',e=>{e.stopPropagation();document.getElementById('menuDropdown').classList.toggle('open')});
+document.addEventListener('click',()=>document.getElementById('menuDropdown').classList.remove('open'));
+document.getElementById('headerSearch').addEventListener('keydown',e=>{if(e.key==='Enter')window.location.href=`/search.html?q=${encodeURIComponent(e.target.value)}`});
+
+const GENRE_META = {
+  'Боевик':      {icon:'💥', color:'#e63946', desc:'Экшн, погони, схватки'},
+  'Триллер':     {icon:'😨', color:'#c77dff', desc:'Напряжение и саспенс'},
+  'Драма':       {icon:'🎭', color:'#4488ff', desc:'Жизненные истории'},
+  'Фантастика':  {icon:'🚀', color:'#00b4d8', desc:'Наука и будущее'},
+  'Криминал':    {icon:'🔫', color:'#6c757d', desc:'Детективы и преступления'},
+  'Комедия':     {icon:'😄', color:'#f5c518', desc:'Смех и юмор'},
+  'Приключения': {icon:'🗺️', color:'#2d9e4f', desc:'Путешествия и открытия'},
+  'Мелодрама':   {icon:'💕', color:'#ff6b9d', desc:'Любовь и отношения'},
+  'Биография':   {icon:'📖', color:'#e07b39', desc:'Реальные истории людей'},
+  'Фэнтези':     {icon:'🧙', color:'#8b5cf6', desc:'Магия и волшебство'},
+  'Аниме':       {icon:'🌸', color:'#fb7185', desc:'Японская анимация'},
+  'Детектив':    {icon:'🔍', color:'#0d9488', desc:'Загадки и расследования'},
+  'История':     {icon:'🏛️', color:'#92400e', desc:'Исторические события'},
+  'Ужасы':       {icon:'👻', color:'#374151', desc:'Страх и horror'},
+};
+
+function movieCard(m){
+  return `<div class="movie-card" onclick="location.href='/movie.html?id=${m.id}'">
+    <img class="card-poster" src="${m.poster}" alt="${m.title}" loading="lazy" onerror="this.style.background='linear-gradient(135deg,${m.gradientFrom},${m.gradientTo})'">
+    <span class="card-rating">★ ${m.rating}</span>
+    <div class="card-overlay">
+      <div class="card-overlay-title">${m.title}</div>
+      <div class="card-overlay-meta"><span>${m.year}</span><span>${formatDuration(m.duration)}</span></div>
+      <div class="card-overlay-btns"><a href="/movie.html?id=${m.id}" class="btn btn-primary btn-sm" onclick="event.stopPropagation()">▶ Смотреть</a></div>
+    </div>
+    <div class="card-info"><div class="card-title">${m.title}</div><div class="card-sub">${m.year} · ${m.genres[0]}</div></div>
+  </div>`;
+}
+
+function showGenre(genre){
+  const section = document.getElementById('genreMoviesSection');
+  const title = document.getElementById('genreTitle');
+  const grid = document.getElementById('genreMoviesGrid');
+  const meta = GENRE_META[genre] || {icon:'🎬'};
+  const movies = MOVIES.filter(m => m.genres.includes(genre));
+  title.innerHTML = `${meta.icon} ${genre} <span style="color:var(--txt3);font-size:.9rem;font-weight:400">(${movies.length} фильмов)</span>`;
+  grid.innerHTML = movies.map(movieCard).join('');
+  section.style.display = 'block';
+  section.scrollIntoView({behavior:'smooth', block:'start'});
+  document.querySelectorAll('.genre-card').forEach(c => c.classList.remove('selected'));
+  document.querySelector(`[data-genre="${genre}"]`)?.classList.add('selected');
+}
+
+// Render genres
+const grid = document.getElementById('genresGrid');
+const allGenres = [...new Set(MOVIES.flatMap(m=>m.genres))];
+grid.innerHTML = allGenres.map(genre => {
+  const meta = GENRE_META[genre] || {icon:'🎬', color:'#888', desc:''};
+  const count = MOVIES.filter(m=>m.genres.includes(genre)).length;
+  return `<div class="genre-card" data-genre="${genre}" onclick="showGenre('${genre}')" style="border-top:3px solid ${meta.color}">
+    <div class="genre-icon">${meta.icon}</div>
+    <div class="genre-name">${genre}</div>
+    <div class="genre-count">${count} фильмов · ${meta.desc}</div>
+  </div>`;
+}).join('');
+
+// URL param
+const params = new URLSearchParams(location.search);
+if(params.get('g')) showGenre(params.get('g'));
+</script>
+</body>
+</html>

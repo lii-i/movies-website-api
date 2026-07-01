@@ -1,0 +1,277 @@
+================================
+  CineVault — API Endpoints
+  (с примерами JSON ответов)
+================================
+
+ФИЛЬМЫ:
+--------
+
+GET /api/movies
+  — Список фильмов с фильтрацией
+  Query: genre, ageRating, yearFrom, yearTo, minRating, sortBy, page, pageSize
+  Ответ:
+  [
+    {
+      "id": 1,
+      "title": "Начало",
+      "originalTitle": "Inception",
+      "year": 2010,
+      "genres": ["Фантастика", "Триллер"],
+      "rating": 8.8,
+      "duration": 148,
+      "ageRating": "13+",
+      "country": "США",
+      "poster": "https://...",
+      "backdrop": "https://...",
+      "isNew": false,
+      "isPopular": true,
+      "featured": true
+      // embedUrl здесь НЕТ — список возвращает короткую версию карточки
+    },
+    ...
+  ]
+
+--------------------------------
+
+GET /api/movies/featured
+  — Фильмы для hero-баннера (featured = true)
+  Ответ: (тот же массив что и /api/movies, только featured фильмы)
+  [
+    {
+      "id": 1,
+      "title": "Начало",
+      "originalTitle": "Inception",
+      "year": 2010,
+      "genres": ["Фантастика", "Триллер"],
+      "rating": 8.8,
+      "duration": 148,
+      "ageRating": "13+",
+      "description": "Описание фильма...",
+      "poster": "https://...",
+      "backdrop": "https://..."
+    }
+  ]
+
+--------------------------------
+
+GET /api/movies/popular
+  — Популярные фильмы (isPopular = true)
+  Ответ: (тот же массив что и /api/movies)
+  [ { "id": 1, "title": "...", ... } ]
+
+--------------------------------
+
+GET /api/movies/new
+  — Новинки (isNew = true)
+  Ответ: (тот же массив что и /api/movies)
+  [ { "id": 23, "title": "Дюна: Часть вторая", ... } ]
+
+--------------------------------
+
+GET /api/movies/:id
+  — Один фильм по ID (полная информация)
+  Ответ:
+  {
+    "id": 1,
+    "title": "Начало",
+    "originalTitle": "Inception",
+    "year": 2010,
+    "genres": ["Фантастика", "Триллер", "Боевик"],
+    "rating": 8.8,
+    "duration": 148,
+    "ageRating": "13+",
+    "country": "США",
+    "description": "Кобб — талантливый вор...",
+    "poster": "https://...",
+    "backdrop": "https://...",
+    "director": "Кристофер Нолан",
+    "cast": ["Леонардо ДиКаприо", "Джозеф Гордон-Левитт"],
+    "embedUrl": "https://your-cdn.ru/embed/1",
+    "isNew": false,
+    "isPopular": true,
+    "featured": true
+  }
+  Если не найден — 404 Not Found
+
+  * embedUrl — ссылка которая вставляется в <iframe src="embedUrl">.
+  * В списках (/api/movies, /api/search) это поле НЕ возвращается —
+    только на странице конкретного фильма (/api/movies/:id).
+
+--------------------------------
+
+GET /api/movies/:id/related
+  — Похожие фильмы (по жанрам или ручным связям)
+  Ответ: (короткая версия карточек)
+  [
+    {
+      "id": 2,
+      "title": "Интерстеллар",
+      "year": 2014,
+      "genres": ["Фантастика", "Драма"],
+      "rating": 8.7,
+      "duration": 169,
+      "ageRating": "12+",
+      "poster": "https://..."
+    }
+  ]
+
+================================================================
+
+ПОИСК И ЖАНРЫ:
+--------------
+
+GET /api/search
+  Query: q, genre, ageRating, yearFrom, yearTo, minRating, sortBy
+  Ответ:
+  [
+    {
+      "id": 1,
+      "title": "Начало",
+      "originalTitle": "Inception",
+      "year": 2010,
+      "genres": ["Фантастика"],
+      "rating": 8.8,
+      "duration": 148,
+      "ageRating": "13+",
+      "poster": "https://..."
+    }
+  ]
+
+--------------------------------
+
+GET /api/genres
+  — Список жанров с количеством фильмов
+  Ответ:
+  [
+    { "name": "Боевик",      "count": 8 },
+    { "name": "Драма",       "count": 12 },
+    { "name": "Фантастика",  "count": 6 },
+    ...
+  ]
+
+================================================================
+
+АВТОРИЗАЦИЯ:
+------------
+
+POST /api/auth/login
+  Тело запроса:
+  { "email": "user@mail.com", "password": "12345678" }
+
+  Успешный ответ (200):
+  {
+    "user": {
+      "id": 1,
+      "name": "Иван",
+      "email": "user@mail.com",
+      "createdAt": "2024-01-15T10:30:00Z"
+    },
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  }
+
+  Ошибка (401):
+  { "message": "Неверный email или пароль" }
+
+--------------------------------
+
+POST /api/auth/register
+  Тело запроса:
+  { "name": "Иван", "email": "user@mail.com", "password": "12345678" }
+
+  Успешный ответ (201):
+  {
+    "user": {
+      "id": 5,
+      "name": "Иван",
+      "email": "user@mail.com",
+      "createdAt": "2024-06-12T18:00:00Z"
+    },
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  }
+
+  Ошибка — email уже занят (400):
+  { "message": "Email уже зарегистрирован" }
+
+--------------------------------
+
+POST /api/auth/logout
+  Тело: (пустое)
+  Ответ (200):
+  { "message": "Logged out" }
+
+================================================================
+
+ПРОФИЛЬ ПОЛЬЗОВАТЕЛЯ:
+(требует заголовок: Authorization: Bearer <token>)
+---------------------
+
+GET /api/users/me
+  Ответ (200):
+  {
+    "id": 1,
+    "name": "Иван",
+    "email": "user@mail.com",
+    "createdAt": "2024-01-15T10:30:00Z"
+  }
+
+  Ошибка — нет токена (401):
+  { "message": "Unauthorized" }
+
+--------------------------------
+
+PUT /api/users/me
+  Тело запроса:
+  { "name": "Новое имя", "email": "new@mail.com" }
+
+  Ответ (200) — обновлённый профиль:
+  {
+    "id": 1,
+    "name": "Новое имя",
+    "email": "new@mail.com",
+    "createdAt": "2024-01-15T10:30:00Z"
+  }
+
+================================================================
+
+СПИСОК ПРОСМОТРА:
+(требует заголовок: Authorization: Bearer <token>)
+-----------------
+
+GET /api/users/me/watchlist
+  Ответ (200):
+  [
+    {
+      "id": 1,
+      "title": "Начало",
+      "year": 2010,
+      "genres": ["Фантастика"],
+      "rating": 8.8,
+      "duration": 148,
+      "ageRating": "13+",
+      "poster": "https://..."
+    }
+  ]
+
+--------------------------------
+
+POST /api/users/me/watchlist/:movieId
+  Тело: (пустое)
+  Ответ (200):
+  { "success": true, "movieId": 1 }
+
+  Ошибка — фильм уже в списке (400):
+  { "message": "Уже в списке просмотра" }
+
+--------------------------------
+
+DELETE /api/users/me/watchlist/:movieId
+  Тело: (пустое)
+  Ответ (200):
+  { "success": true, "movieId": 1 }
+
+  Ошибка — не найден в списке (404):
+  { "message": "Фильм не найден в списке" }
+
+================================
+  Итого: 16 эндпоинтов
+================================

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Поиск — CineVault</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<header class="header">
+  <div class="header-left">
+    <div class="menu-wrap">
+      <button class="burger-btn" id="burgerBtn">☰</button>
+      <div class="menu-dropdown" id="menuDropdown">
+        <a href="/account.html" class="menu-item">👤 Мой профиль</a>
+        <div class="menu-divider"></div>
+        <a href="/genres.html" class="menu-item">🎬 Жанры</a>
+        <a href="#" class="menu-item danger" onclick="logout();return false">🚪 Выйти</a>
+      </div>
+    </div>
+  </div>
+  <a href="/index.html" class="header-logo">🎬 CineVault</a>
+  <div class="header-right">
+    <a href="/auth.html" class="btn btn-primary btn-sm" id="authBtn">Войти</a>
+  </div>
+</header>
+
+<main class="page">
+  <div class="search-hero">
+    <div class="container">
+      <a href="/index.html" class="back-btn" style="margin-bottom:16px">← На главную</a>
+      <h1 style="font-size:1.8rem;font-weight:800;margin-bottom:16px">Поиск фильмов</h1>
+      <div class="search-big">
+        <span>🔍</span>
+        <input type="text" id="searchInput" placeholder="Введите название, режиссёра..." autofocus>
+        <button class="btn btn-ghost btn-sm" id="clearSearch" style="display:none" onclick="clearSearch()">✕</button>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap" id="quickFilters">
+        <button class="genre-pill" onclick="quickSearch('Боевик')">💥 Боевик</button>
+        <button class="genre-pill" onclick="quickSearch('Драма')">🎭 Драма</button>
+        <button class="genre-pill" onclick="quickSearch('Комедия')">😄 Комедия</button>
+        <button class="genre-pill" onclick="quickSearch('Фантастика')">🚀 Фантастика</button>
+        <button class="genre-pill" onclick="quickSearch('Триллер')">😨 Триллер</button>
+        <button class="genre-pill" onclick="quickSearch('Фэнтези')">🧙 Фэнтези</button>
+        <button class="genre-pill" onclick="quickSearch('Аниме')">🌸 Аниме</button>
+        <button class="genre-pill" onclick="quickSearch('Криминал')">🔫 Криминал</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div style="display:flex;gap:16px;align-items:center;margin:20px 0 8px;flex-wrap:wrap">
+      <div class="search-count" style="margin:0" id="searchCount"></div>
+      <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+        <span style="color:var(--txt3);font-size:.82rem">Сортировка:</span>
+        <select class="filter-select" id="sortSelect">
+          <option value="">По умолчанию</option>
+          <option value="rating">По рейтингу</option>
+          <option value="year">По году</option>
+          <option value="title">По названию</option>
+        </select>
+      </div>
+    </div>
+    <div class="movie-grid" id="searchGrid"></div>
+    <div class="no-results" id="noResults" style="display:none">
+      <div class="no-results-icon">🔍</div>
+      <h2 style="margin-bottom:8px">Ничего не найдено</h2>
+      <p>Попробуйте другой запрос или выберите жанр выше</p>
+    </div>
+  </div>
+</main>
+
+<script src="/js/data.js"></script>
+<script src="/js/api.js"></script>
+<script>
+const user = getCurrentUser();
+if(user) document.getElementById('authBtn').outerHTML=`<a href="/account.html" class="btn btn-ghost btn-sm">👤 ${user.name}</a>`;
+document.getElementById('burgerBtn').addEventListener('click',e=>{e.stopPropagation();document.getElementById('menuDropdown').classList.toggle('open')});
+document.addEventListener('click',()=>document.getElementById('menuDropdown').classList.remove('open'));
+
+function movieCard(m){
+  return `<div class="movie-card" onclick="location.href='/movie.html?id=${m.id}'">
+    <img class="card-poster" src="${m.poster}" alt="${m.title}" loading="lazy" onerror="this.style.background='linear-gradient(135deg,${m.gradientFrom},${m.gradientTo})'">
+    ${m.isNew?'<span class="card-badge badge-new">NEW</span>':''}
+    <span class="card-rating">★ ${m.rating}</span>
+    <div class="card-overlay">
+      <div class="card-overlay-title">${m.title}</div>
+      <div class="card-overlay-meta"><span>${m.year}</span><span>${formatDuration(m.duration)}</span></div>
+      <div class="card-overlay-btns"><a href="/movie.html?id=${m.id}" class="btn btn-primary btn-sm" onclick="event.stopPropagation()">▶ Смотреть</a></div>
+    </div>
+    <div class="card-info"><div class="card-title">${m.title}</div><div class="card-sub">${m.year} · ${m.genres[0]}</div></div>
+  </div>`;
+}
+
+function renderResults(results){
+  const grid = document.getElementById('searchGrid');
+  const count = document.getElementById('searchCount');
+  const noR = document.getElementById('noResults');
+  count.innerHTML = `Найдено: <strong>${results.length}</strong> фильмов`;
+  if(!results.length){grid.innerHTML='';noR.style.display='block'}
+  else{noR.style.display='none';grid.innerHTML=results.map(movieCard).join('')}
+}
+
+async function doSearch(){
+  const q = document.getElementById('searchInput').value;
+  const sort = document.getElementById('sortSelect').value;
+  document.getElementById('clearSearch').style.display = q ? 'flex' : 'none';
+  // GET /api/search?q=...&sortBy=...
+  const results = await apiSearch(q, { sortBy: sort });
+  renderResults(results);
+}
+
+function clearSearch(){
+  document.getElementById('searchInput').value='';
+  document.getElementById('clearSearch').style.display='none';
+  doSearch();
+}
+
+function quickSearch(genre){
+  document.getElementById('searchInput').value=genre;
+  doSearch();
+}
+
+document.getElementById('searchInput').addEventListener('input', doSearch);
+document.getElementById('sortSelect').addEventListener('change', doSearch);
+
+// Init from URL
+const params = new URLSearchParams(location.search);
+const q = params.get('q') || '';
+const sortP = params.get('sort') || '';
+if(q) document.getElementById('searchInput').value = q;
+if(sortP) document.getElementById('sortSelect').value = sortP;
+doSearch();
+</script>
+</body>
+</html>

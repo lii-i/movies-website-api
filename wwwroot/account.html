@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Мой профиль — CineVault</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<header class="header">
+  <div class="header-left">
+    <div class="menu-wrap">
+      <button class="burger-btn" id="burgerBtn">☰</button>
+      <div class="menu-dropdown" id="menuDropdown">
+        <a href="/genres.html" class="menu-item">🎬 Жанры</a>
+        <a href="/search.html" class="menu-item">🔍 Поиск</a>
+        <div class="menu-divider"></div>
+        <a href="#" class="menu-item danger" onclick="logout();return false">🚪 Выйти</a>
+      </div>
+    </div>
+  </div>
+  <a href="/index.html" class="header-logo">🎬 CineVault</a>
+  <div class="header-right">
+    <div class="header-search">
+      <span>🔍</span>
+      <input type="text" id="headerSearch" placeholder="Поиск...">
+    </div>
+  </div>
+</header>
+
+<main class="page">
+  <div id="accountContent">
+    <div class="loader-wrap" style="padding:80px"><div class="loader"></div></div>
+  </div>
+</main>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="/js/data.js"></script>
+<script src="/js/api.js"></script>
+<script>
+document.getElementById('burgerBtn').addEventListener('click',e=>{e.stopPropagation();document.getElementById('menuDropdown').classList.toggle('open')});
+document.addEventListener('click',()=>document.getElementById('menuDropdown').classList.remove('open'));
+document.getElementById('headerSearch').addEventListener('keydown',e=>{if(e.key==='Enter')window.location.href=`/search.html?q=${encodeURIComponent(e.target.value)}`});
+
+function showToast(msg,type=''){
+  const t=document.createElement('div');t.className=`toast ${type?'toast-'+type:''}`;
+  t.innerHTML=`<span class="toast-icon">${type==='success'?'✅':'ℹ'}</span><span>${msg}</span>`;
+  document.getElementById('toastContainer').appendChild(t);setTimeout(()=>t.remove(),3000);
+}
+
+function movieCard(m){
+  return `<div class="movie-card" onclick="location.href='/movie.html?id=${m.id}'">
+    <img class="card-poster" src="${m.poster}" alt="${m.title}" loading="lazy" onerror="this.style.background='linear-gradient(135deg,${m.gradientFrom},${m.gradientTo})'">
+    <span class="card-rating">★ ${m.rating}</span>
+    <div class="card-overlay">
+      <div class="card-overlay-title">${m.title}</div>
+      <div class="card-overlay-meta"><span>${m.year}</span></div>
+      <div class="card-overlay-btns">
+        <a href="/movie.html?id=${m.id}" class="btn btn-primary btn-sm" onclick="event.stopPropagation()">▶</a>
+        <button class="watchlist-btn active" onclick="event.stopPropagation();removeFromWl(${m.id},this)">🗑</button>
+      </div>
+    </div>
+    <div class="card-info"><div class="card-title">${m.title}</div><div class="card-sub">${m.year} · ${m.genres[0]}</div></div>
+  </div>`;
+}
+
+// GET /api/users/me/watchlist
+async function removeFromWl(id,btn){
+  await apiRemoveFromWatchlist(id);
+  btn.closest('.movie-card').remove();
+  showToast('Удалено из списка');
+  const wl=document.getElementById('watchlistGrid');
+  if(wl&&!wl.children.length) wl.innerHTML='<p style="color:var(--txt3);grid-column:1/-1">Список пуст. <a href="/index.html" style="color:var(--gold)">Добавить фильмы →</a></p>';
+}
+
+function switchAccountTab(tab){
+  document.querySelectorAll('.account-tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===tab));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.toggle('active',p.id==='panel-'+tab));
+}
+
+function renderAccount(user, watchlist = []){
+  const joined = new Date(user.createdAt).toLocaleDateString('ru-RU',{month:'long',year:'numeric'});
+
+  document.getElementById('accountContent').innerHTML = `
+    <div class="account-hero">
+      <div class="container">
+        <div style="display:flex;align-items:center;gap:24px;flex-wrap:wrap">
+          <div>
+            <div class="avatar">${user.name.charAt(0).toUpperCase()}</div>
+          </div>
+          <div>
+            <h1 class="account-name">${user.name}</h1>
+            <div class="account-email">${user.email}</div>
+            <div style="color:var(--txt3);font-size:.82rem;margin-top:4px">На сайте с ${joined}</div>
+            <div class="account-stats">
+              <div class="stat"><div class="stat-val">${watchlist.length}</div><div class="stat-lbl">В списке</div></div>
+              <div class="stat"><div class="stat-val">0</div><div class="stat-lbl">Просмотрено</div></div>
+              <div class="stat"><div class="stat-val">0</div><div class="stat-lbl">Оценок</div></div>
+            </div>
+          </div>
+          <div style="margin-left:auto">
+            <button class="btn btn-ghost" onclick="logout()">🚪 Выйти</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="account-tabs">
+        <div class="account-tab active" data-tab="watchlist" onclick="switchAccountTab('watchlist')">🔖 Список просмотра</div>
+        <div class="account-tab" data-tab="history" onclick="switchAccountTab('history')">🕓 История</div>
+        <div class="account-tab" data-tab="settings" onclick="switchAccountTab('settings')">⚙️ Настройки</div>
+      </div>
+
+      <div class="tab-panel active" id="panel-watchlist">
+        <div class="movie-grid" id="watchlistGrid">
+          ${watchlist.length ? watchlist.map(movieCard).join('') : '<p style="color:var(--txt3);grid-column:1/-1">Список пуст. <a href="/index.html" style="color:var(--gold)">Добавить фильмы →</a></p>'}
+        </div>
+      </div>
+
+      <div class="tab-panel" id="panel-history">
+        <div style="text-align:center;padding:60px 20px;color:var(--txt2)">
+          <div style="font-size:2.5rem;margin-bottom:12px">🕓</div>
+          <h3 style="margin-bottom:8px">История пуста</h3>
+          <p style="font-size:.9rem">Просмотренные фильмы будут отображаться здесь</p>
+          <a href="/index.html" class="btn btn-primary" style="margin-top:16px;display:inline-flex">Смотреть фильмы</a>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="panel-settings">
+        <div style="max-width:480px">
+          <h2 style="font-size:1.1rem;font-weight:700;margin-bottom:20px">Настройки профиля</h2>
+          <form onsubmit="saveSettings(event)">
+            <div class="form-group">
+              <label class="form-label">Имя</label>
+              <input class="form-input" id="settingName" value="${user.name}">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email</label>
+              <input class="form-input" id="settingEmail" value="${user.email}" type="email">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Новый пароль</label>
+              <input class="form-input" id="settingPwd" type="password" placeholder="Оставьте пустым, чтобы не менять">
+            </div>
+            <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+          </form>
+          <div style="margin-top:32px;padding-top:24px;border-top:1px solid var(--brd)">
+            <h3 style="font-size:.95rem;font-weight:700;color:var(--red);margin-bottom:12px">Опасная зона</h3>
+            <button class="btn btn-ghost" style="border-color:var(--red);color:var(--red)" onclick="if(confirm('Удалить аккаунт?')){logout()}">Удалить аккаунт</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Handle hash
+  const hash = location.hash.replace('#','');
+  if(hash) switchAccountTab(hash);
+}
+
+// PUT /api/users/me
+async function saveSettings(e){
+  e.preventDefault();
+  const updated = await apiUpdateProfile({
+    name: document.getElementById('settingName').value,
+    email: document.getElementById('settingEmail').value
+  });
+  showToast('✅ Сохранено', 'success');
+}
+
+// GET /api/users/me + GET /api/users/me/watchlist
+async function init(){
+  const user = await apiGetProfile();
+  if(!user){ window.location.href='/auth.html?redirect=/account.html'; return; }
+  const watchlist = await apiGetWatchlist();
+  renderAccount(user, watchlist);
+}
+init();
+</script>
+</body>
+</html>
