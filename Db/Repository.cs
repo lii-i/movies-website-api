@@ -1,18 +1,24 @@
-public class Repository{
+public interface IRepository{
+    public async Task<List<FilmEntity>> GetFilmsFilter();
+    public async Task<int?> GetRequestCount();
+    public async Task<double> GetRequestAverage();
+}
 
-    private CinemaDbContext db;
+public class Repository:IRepository{
 
-    public Repository(CinemaDbContext Db){
-        db = Db;
+    private CinemaDbContext _db;
+
+    public Repository(CinemaDbContext DB){
+        _db = DB;
     }
 
     public async Task<List<FilmEntity>> GetFilmsFilter(string[]? genres, int? ageRating, int? yearFrom, int? yearTo, double? minRating, string? sortBy, int? lastId, int pageSize){
-        IQueryable<FilmEntity> films = db.Films.Where(f => (genres == null || genres.All(g => f.Genres.Any(dbGenre => dbGenre.Name == g))) && (!ageRating.HasValue || f.AgeRating == ageRating.Value) && (!yearFrom.HasValue || f.DateRelease.Year >= yearFrom.Value) && (!yearTo.HasValue || f.DateRelease.Year <= yearTo.Value) && (!minRating.HasValue || f.Rating > minRating.Value));
+        IQueryable<FilmEntity> films = _db.Films.Where(f => (genres == null || genres.All(g => f.Genres.Any(dbGenre => dbGenre.Name == g))) && (!ageRating.HasValue || f.AgeRating == ageRating.Value) && (!yearFrom.HasValue || f.DateRelease.Year >= yearFrom.Value) && (!yearTo.HasValue || f.DateRelease.Year <= yearTo.Value) && (!minRating.HasValue || f.Rating > minRating.Value));
        
         FilmEntity? lastFilm = null;
 
         if(lastId.HasValue && lastId.Value != 0){
-            lastFilm = await db.Films.FirstOrDefaultAsync(f => f.Id == lastId);
+            lastFilm = await _db.Films.FirstOrDefaultAsync(f => f.Id == lastId);
         }  
 
         switch(sortBy?.ToLower()){
@@ -48,7 +54,7 @@ public class Repository{
                 break;
             default:
                 if(lastId.HasValue && lastId.Value > 0){
-                    films = films.Where(f => f.Id > lastId);
+                    films = films.Where(f => f.Id > lastId.Value);
                 }
                 films = films.OrderBy(f => f.Id);
         }   
@@ -57,14 +63,11 @@ public class Repository{
     }
 
     public async Task<int?> GetRequestCount(int id){
-        FilmEntity? film = await db.Films.FirstOrDefaultAsync(f => f.Id == id);
-        if(film == null) return null;
-
-        return film.RequestCount;
+        return await _db.Films.Where(f => f.Id == id).Select(f => (int?)f.RequestCount).FirstOrDefault();
     }
 
     public async Task<double> GetRequestAverage(){
 
-        return await db.FilmEntity.AverageAsync(f => f.RequestCount);
+        return await _db.Films.AverageAsync(f => f.RequestCount);
     }
 }

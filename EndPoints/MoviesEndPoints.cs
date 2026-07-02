@@ -2,7 +2,9 @@ public static class MoviesEndPoints{
     public static AddMoviesEndPoints(this WebApplication app){
         var movieGroup = app.MapGroup("/api/movies");
         
-        movieGroup.MapGet("/", async ([FromServices] Repository rep, [FromQuery] string[]? genres, [FromQuery] int? ageRating, [FromQuery] int? yearFrom, [FromQuery] int? yearTo, [FromQuery] double? minRating, [FromQuery] string? sortBy, [ FromQuery] int? lastId, [FromQuery] int? pageSize)=> {
+        movieGroup.MapGet("/", async ([FromServices] IRepository rep, [FromQuery] string[]? genres, [FromQuery] int? ageRating, [FromQuery] int? yearFrom, [FromQuery] int? yearTo, [FromQuery] double? minRating, [FromQuery] string? sortBy, [ FromQuery] int? lastId, [FromQuery] int? pageSize)=> {
+            
+            
             if(!pageSize.HasValue) pageSize = 20;
             
             List<FilmEntity> films = await rep.GetFilmsFilter(genres,ageRating,yearFrom,yearTo,minRating,sortBy,lastId,pageSize);

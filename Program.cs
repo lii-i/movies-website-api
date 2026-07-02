@@ -4,7 +4,7 @@ public class Program {
         var Config = builder.Configuration;
 
         builder.Services.AddDbContext<CinemaDbContext>(options => options.UsePostgreSql(Config.GetConnectionString("PostgreSql"))); 
-        builder.Services.AddScoped<Repository>();
+        builder.Services.AddScoped<IRepository,Repository>();
         var app = builder.Build();
 
         if (app.Environment.IsDevelopment())
