@@ -14,6 +14,7 @@ public class Program {
         else
         {
             app.UseExceptionHandler("/error");
+            app.MapGet("/error", () => "error");
         }
     
         app.UseDefaultFiles();   

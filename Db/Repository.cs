@@ -12,8 +12,14 @@ public class Repository:IRepository{
         _db = DB;
     }
 
-    public async Task<List<FilmEntity>> GetFilmsFilter(string[]? genres, int? ageRating, int? yearFrom, int? yearTo, double? minRating, string? sortBy, int? lastId, int pageSize){
-        IQueryable<FilmEntity> films = _db.Films.Where(f => (genres == null || genres.All(g => f.Genres.Any(dbGenre => dbGenre.Name == g))) && (!ageRating.HasValue || f.AgeRating == ageRating.Value) && (!yearFrom.HasValue || f.DateRelease.Year >= yearFrom.Value) && (!yearTo.HasValue || f.DateRelease.Year <= yearTo.Value) && (!minRating.HasValue || f.Rating > minRating.Value));
+    public async Task<List<FilmEntity>> GetFilmsFilter(string[]? genres, int? ageRating, int? yearFrom, int? yearTo, double? minRating, bool? featured, string? sortBy, int? lastId, int pageSize){
+        IQueryable<FilmEntity> films = _db.Films.Where(f => (genres == null || genres.All(g => f.Genres.Any(dbGenre => dbGenre.Name == g))) && 
+        (!ageRating.HasValue || f.AgeRating == ageRating.Value) && 
+        (!yearFrom.HasValue || f.DateRelease.Year >= yearFrom.Value) && 
+        (!yearTo.HasValue || f.DateRelease.Year <= yearTo.Value) && 
+        (!minRating.HasValue || f.Rating > minRating.Value) &&
+        (!featured.HasValue || f.Featured == featured.HasValue)
+        )
        
         FilmEntity? lastFilm = null;
 
