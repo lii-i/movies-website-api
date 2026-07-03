@@ -1,55 +1,60 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Мой профиль — CineVault</title>
-<link rel="stylesheet" href="/css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Мой профиль — CineVault</title>
+  <link rel="stylesheet" href="/css/style.css">
 </head>
+
 <body>
-<header class="header">
-  <div class="header-left">
-    <div class="menu-wrap">
-      <button class="burger-btn" id="burgerBtn">☰</button>
-      <div class="menu-dropdown" id="menuDropdown">
-        <a href="/genres.html" class="menu-item">🎬 Жанры</a>
-        <a href="/search.html" class="menu-item">🔍 Поиск</a>
-        <div class="menu-divider"></div>
-        <a href="#" class="menu-item danger" onclick="logout();return false">🚪 Выйти</a>
+  <header class="header">
+    <div class="header-left">
+      <div class="menu-wrap">
+        <button class="burger-btn" id="burgerBtn">☰</button>
+        <div class="menu-dropdown" id="menuDropdown">
+          <a href="/genres.html" class="menu-item">🎬 Жанры</a>
+          <a href="/search.html" class="menu-item">🔍 Поиск</a>
+          <div class="menu-divider"></div>
+          <a href="#" class="menu-item danger" onclick="logout();return false">🚪 Выйти</a>
+        </div>
       </div>
     </div>
-  </div>
-  <a href="/index.html" class="header-logo">🎬 CineVault</a>
-  <div class="header-right">
-    <div class="header-search">
-      <span>🔍</span>
-      <input type="text" id="headerSearch" placeholder="Поиск...">
+    <a href="/index.html" class="header-logo">🎬 CineVault</a>
+    <div class="header-right">
+      <div class="header-search">
+        <span>🔍</span>
+        <input type="text" id="headerSearch" placeholder="Поиск...">
+      </div>
     </div>
-  </div>
-</header>
+  </header>
 
-<main class="page">
-  <div id="accountContent">
-    <div class="loader-wrap" style="padding:80px"><div class="loader"></div></div>
-  </div>
-</main>
+  <main class="page">
+    <div id="accountContent">
+      <div class="loader-wrap" style="padding:80px">
+        <div class="loader"></div>
+      </div>
+    </div>
+  </main>
 
-<div class="toast-container" id="toastContainer"></div>
+  <div class="toast-container" id="toastContainer"></div>
 
-<script src="/js/data.js"></script>
-<script src="/js/api.js"></script>
-<script>
-document.getElementById('burgerBtn').addEventListener('click',e=>{e.stopPropagation();document.getElementById('menuDropdown').classList.toggle('open')});
-document.addEventListener('click',()=>document.getElementById('menuDropdown').classList.remove('open'));
-document.getElementById('headerSearch').addEventListener('keydown',e=>{if(e.key==='Enter')window.location.href=`/search.html?q=${encodeURIComponent(e.target.value)}`});
+  <script src="/js/data.js"></script>
+  <script src="/js/api.js"></script>
+  <script>
+    document.getElementById('burgerBtn').addEventListener('click', e => { e.stopPropagation(); document.getElementById('menuDropdown').classList.toggle('open') });
+    document.addEventListener('click', () => document.getElementById('menuDropdown').classList.remove('open'));
+    document.getElementById('headerSearch').addEventListener('keydown', e => { if (e.key === 'Enter') window.location.href = `/search.html?q=${encodeURIComponent(e.target.value)}` });
 
-function showToast(msg,type=''){
-  const t=document.createElement('div');t.className=`toast ${type?'toast-'+type:''}`;
-  t.innerHTML=`<span class="toast-icon">${type==='success'?'✅':'ℹ'}</span><span>${msg}</span>`;
-  document.getElementById('toastContainer').appendChild(t);setTimeout(()=>t.remove(),3000);
-}
+    function showToast(msg, type = '') {
+      const t = document.createElement('div'); t.className = `toast ${type ? 'toast-' + type : ''}`;
+      t.innerHTML = `<span class="toast-icon">${type === 'success' ? '✅' : 'ℹ'}</span><span>${msg}</span>`;
+      document.getElementById('toastContainer').appendChild(t); setTimeout(() => t.remove(), 3000);
+    }
 
-function movieCard(m){
-  return `<div class="movie-card" onclick="location.href='/movie.html?id=${m.id}'">
+    function movieCard(m) {
+      return `<div class="movie-card" onclick="location.href='/movie.html?id=${m.id}'">
     <img class="card-poster" src="${m.poster}" alt="${m.title}" loading="lazy" onerror="this.style.background='linear-gradient(135deg,${m.gradientFrom},${m.gradientTo})'">
     <span class="card-rating">★ ${m.rating}</span>
     <div class="card-overlay">
@@ -62,26 +67,26 @@ function movieCard(m){
     </div>
     <div class="card-info"><div class="card-title">${m.title}</div><div class="card-sub">${m.year} · ${m.genres[0]}</div></div>
   </div>`;
-}
+    }
 
-// GET /api/users/me/watchlist
-async function removeFromWl(id,btn){
-  await apiRemoveFromWatchlist(id);
-  btn.closest('.movie-card').remove();
-  showToast('Удалено из списка');
-  const wl=document.getElementById('watchlistGrid');
-  if(wl&&!wl.children.length) wl.innerHTML='<p style="color:var(--txt3);grid-column:1/-1">Список пуст. <a href="/index.html" style="color:var(--gold)">Добавить фильмы →</a></p>';
-}
+    // GET /api/users/me/watchlist
+    async function removeFromWl(id, btn) {
+      await apiRemoveFromWatchlist(id);
+      btn.closest('.movie-card').remove();
+      showToast('Удалено из списка');
+      const wl = document.getElementById('watchlistGrid');
+      if (wl && !wl.children.length) wl.innerHTML = '<p style="color:var(--txt3);grid-column:1/-1">Список пуст. <a href="/index.html" style="color:var(--gold)">Добавить фильмы →</a></p>';
+    }
 
-function switchAccountTab(tab){
-  document.querySelectorAll('.account-tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===tab));
-  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.toggle('active',p.id==='panel-'+tab));
-}
+    function switchAccountTab(tab) {
+      document.querySelectorAll('.account-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + tab));
+    }
 
-function renderAccount(user, watchlist = []){
-  const joined = new Date(user.createdAt).toLocaleDateString('ru-RU',{month:'long',year:'numeric'});
+    function renderAccount(user, watchlist = []) {
+      const joined = new Date(user.createdAt).toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' });
 
-  document.getElementById('accountContent').innerHTML = `
+      document.getElementById('accountContent').innerHTML = `
     <div class="account-hero">
       <div class="container">
         <div style="display:flex;align-items:center;gap:24px;flex-wrap:wrap">
@@ -154,29 +159,30 @@ function renderAccount(user, watchlist = []){
     </div>
   `;
 
-  // Handle hash
-  const hash = location.hash.replace('#','');
-  if(hash) switchAccountTab(hash);
-}
+      // Handle hash
+      const hash = location.hash.replace('#', '');
+      if (hash) switchAccountTab(hash);
+    }
 
-// PUT /api/users/me
-async function saveSettings(e){
-  e.preventDefault();
-  const updated = await apiUpdateProfile({
-    name: document.getElementById('settingName').value,
-    email: document.getElementById('settingEmail').value
-  });
-  showToast('✅ Сохранено', 'success');
-}
+    // PUT /api/users/me
+    async function saveSettings(e) {
+      e.preventDefault();
+      const updated = await apiUpdateProfile({
+        name: document.getElementById('settingName').value,
+        email: document.getElementById('settingEmail').value
+      });
+      showToast('✅ Сохранено', 'success');
+    }
 
-// GET /api/users/me + GET /api/users/me/watchlist
-async function init(){
-  const user = await apiGetProfile();
-  if(!user){ window.location.href='/auth.html?redirect=/account.html'; return; }
-  const watchlist = await apiGetWatchlist();
-  renderAccount(user, watchlist);
-}
-init();
-</script>
+    // GET /api/users/me + GET /api/users/me/watchlist
+    async function init() {
+      const user = await apiGetProfile();
+      if (!user) { window.location.href = '/auth.html?redirect=/account.html'; return; }
+      const watchlist = await apiGetWatchlist();
+      renderAccount(user, watchlist);
+    }
+    init();
+  </script>
 </body>
+
 </html>

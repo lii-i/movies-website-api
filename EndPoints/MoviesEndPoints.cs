@@ -77,7 +77,7 @@ public static class MoviesEndPoints{
             return TypedResults.Ok(movies);
         });
 
-        app.MapGet("/popular", 
+        movieGroup.MapGet("/popular", 
         async (
             [FromServices] IRepository rep,
             [FromQuery] int? lastId,

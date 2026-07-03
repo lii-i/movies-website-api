@@ -1,185 +1,203 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>CineVault — Смотри лучшее кино</title>
-<meta name="description" content="CineVault — онлайн-кинотеатр с тысячами фильмов, сериалов и аниме в высоком качестве.">
-<link rel="stylesheet" href="/css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>CineVault — Смотри лучшее кино</title>
+  <meta name="description"
+    content="CineVault — онлайн-кинотеатр с тысячами фильмов, сериалов и аниме в высоком качестве.">
+  <link rel="stylesheet" href="/css/style.css">
 </head>
+
 <body>
-<header class="header">
-  <div class="header-left">
-    <div class="menu-wrap">
-      <button class="burger-btn" id="burgerBtn" aria-label="Меню">☰</button>
-      <div class="menu-dropdown" id="menuDropdown">
-        <a href="/account.html" class="menu-item">👤 Мой профиль</a>
-        <a href="/account.html#watchlist" class="menu-item">🔖 Список просмотра</a>
-        <a href="/account.html#history" class="menu-item">🕓 История</a>
-        <div class="menu-divider"></div>
-        <a href="/genres.html" class="menu-item">🎬 Жанры</a>
-        <a href="/search.html?sort=rating" class="menu-item">⭐ Топ фильмов</a>
-        <a href="/search.html?new=true" class="menu-item">🆕 Новинки</a>
-        <div class="menu-divider"></div>
-        <a href="#" class="menu-item" onclick="logout();return false">⚙️ Настройки</a>
-        <a href="#" class="menu-item danger" onclick="logout();return false">🚪 Выйти</a>
+  <header class="header">
+    <div class="header-left">
+      <div class="menu-wrap">
+        <button class="burger-btn" id="burgerBtn" aria-label="Меню">☰</button>
+        <div class="menu-dropdown" id="menuDropdown">
+          <a href="/account.html" class="menu-item">👤 Мой профиль</a>
+          <a href="/account.html#watchlist" class="menu-item">🔖 Список просмотра</a>
+          <a href="/account.html#history" class="menu-item">🕓 История</a>
+          <div class="menu-divider"></div>
+          <a href="/genres.html" class="menu-item">🎬 Жанры</a>
+          <a href="/search.html?sort=rating" class="menu-item">⭐ Топ фильмов</a>
+          <a href="/search.html?new=true" class="menu-item">🆕 Новинки</a>
+          <div class="menu-divider"></div>
+          <a href="#" class="menu-item" onclick="logout();return false">⚙️ Настройки</a>
+          <a href="#" class="menu-item danger" onclick="logout();return false">🚪 Выйти</a>
+        </div>
       </div>
     </div>
-  </div>
-  <a href="/index.html" class="header-logo">🎬 CineVault</a>
-  <div class="header-right">
-    <div class="header-search">
-      <span>🔍</span>
-      <input type="text" id="headerSearch" placeholder="Поиск...">
+    <a href="/index.html" class="header-logo">🎬 CineVault</a>
+    <div class="header-right">
+      <div class="header-search">
+        <span>🔍</span>
+        <input type="text" id="headerSearch" placeholder="Поиск...">
+      </div>
+      <a href="/auth.html" class="btn btn-primary btn-sm" id="authBtn">Войти</a>
     </div>
-    <a href="/auth.html" class="btn btn-primary btn-sm" id="authBtn">Войти</a>
-  </div>
-</header>
+  </header>
 
-<main class="page">
-  <!-- HERO -->
-  <section class="hero" id="heroSection"></section>
+  <main class="page">
+    <!-- HERO -->
+    <section class="hero" id="heroSection"></section>
 
-  <!-- FILTERS -->
-  <div class="filters" id="filtersBar">
-    <div class="container">
-      <div class="filters-inner">
-        <div class="filter-group">
-          <span class="filter-label">Жанр</span>
-          <div class="genre-scroll" id="genreScroll"></div>
-        </div>
-        <div class="filters-divider"></div>
-        <div class="filter-group">
-          <span class="filter-label">Рейтинг</span>
-          <div class="rating-range">
-            <input type="range" id="ratingRange" min="0" max="10" step="0.5" value="0">
-            <span class="rating-val" id="ratingVal">0+</span>
+    <!-- FILTERS -->
+    <div class="filters" id="filtersBar">
+      <div class="container">
+        <div class="filters-inner">
+          <div class="filter-group">
+            <span class="filter-label">Жанр</span>
+            <div class="genre-scroll" id="genreScroll"></div>
           </div>
+          <div class="filters-divider"></div>
+          <div class="filter-group">
+            <span class="filter-label">Рейтинг</span>
+            <div class="rating-range">
+              <input type="range" id="ratingRange" min="0" max="10" step="0.5" value="0">
+              <span class="rating-val" id="ratingVal">0+</span>
+            </div>
+          </div>
+          <div class="filters-divider"></div>
+          <div class="filter-group">
+            <span class="filter-label">Возраст</span>
+            <select class="filter-select" id="ageSelect">
+              <option value="">Все</option>
+              <option>0+</option>
+              <option>6+</option>
+              <option>12+</option>
+              <option>13+</option>
+              <option>16+</option>
+              <option>18+</option>
+            </select>
+          </div>
+          <div class="filters-divider"></div>
+          <div class="filter-group">
+            <span class="filter-label">Год</span>
+            <select class="filter-select" id="yearFrom">
+              <option value="">От</option>
+              <option>1990</option>
+              <option>2000</option>
+              <option>2010</option>
+              <option>2015</option>
+              <option>2020</option>
+              <option>2023</option>
+            </select>
+            <select class="filter-select" id="yearTo">
+              <option value="">До</option>
+              <option>2000</option>
+              <option>2010</option>
+              <option>2015</option>
+              <option>2020</option>
+              <option>2024</option>
+            </select>
+          </div>
+          <div class="filters-divider"></div>
+          <div class="filter-group">
+            <span class="filter-label">Сортировка</span>
+            <select class="filter-select" id="sortBy">
+              <option value="popular">По популярности</option>
+              <option value="rating">По рейтингу</option>
+              <option value="year">По году</option>
+              <option value="title">По названию</option>
+            </select>
+          </div>
+          <button class="btn btn-ghost btn-sm" id="resetFilters">✕ Сбросить</button>
         </div>
-        <div class="filters-divider"></div>
-        <div class="filter-group">
-          <span class="filter-label">Возраст</span>
-          <select class="filter-select" id="ageSelect">
-            <option value="">Все</option>
-            <option>0+</option><option>6+</option><option>12+</option>
-            <option>13+</option><option>16+</option><option>18+</option>
-          </select>
-        </div>
-        <div class="filters-divider"></div>
-        <div class="filter-group">
-          <span class="filter-label">Год</span>
-          <select class="filter-select" id="yearFrom">
-            <option value="">От</option>
-            <option>1990</option><option>2000</option><option>2010</option>
-            <option>2015</option><option>2020</option><option>2023</option>
-          </select>
-          <select class="filter-select" id="yearTo">
-            <option value="">До</option>
-            <option>2000</option><option>2010</option><option>2015</option>
-            <option>2020</option><option>2024</option>
-          </select>
-        </div>
-        <div class="filters-divider"></div>
-        <div class="filter-group">
-          <span class="filter-label">Сортировка</span>
-          <select class="filter-select" id="sortBy">
-            <option value="popular">По популярности</option>
-            <option value="rating">По рейтингу</option>
-            <option value="year">По году</option>
-            <option value="title">По названию</option>
-          </select>
-        </div>
-        <button class="btn btn-ghost btn-sm" id="resetFilters">✕ Сбросить</button>
       </div>
     </div>
-  </div>
 
-  <!-- FEATURED STRIP -->
-  <div class="container">
-    <section class="section">
-      <h2 class="section-title">Популярное сейчас <a href="/search.html?popular=1" class="see-all">Все →</a></h2>
-      <div class="movie-grid" id="popularGrid"></div>
-    </section>
+    <!-- FEATURED STRIP -->
+    <div class="container">
+      <section class="section">
+        <h2 class="section-title">Популярное сейчас <a href="/search.html?popular=1" class="see-all">Все →</a></h2>
+        <div class="movie-grid" id="popularGrid"></div>
+      </section>
 
-    <section class="section">
-      <h2 class="section-title">Новинки <a href="/search.html?new=1" class="see-all">Все →</a></h2>
-      <div class="movie-grid" id="newGrid"></div>
-    </section>
+      <section class="section">
+        <h2 class="section-title">Новинки <a href="/search.html?new=1" class="see-all">Все →</a></h2>
+        <div class="movie-grid" id="newGrid"></div>
+      </section>
 
-    <section class="section">
-      <h2 class="section-title">Все фильмы</h2>
-      <div class="movie-grid" id="mainGrid"></div>
-      <div class="loader-wrap" id="loader" style="display:none"><div class="loader"></div></div>
-    </section>
-  </div>
-</main>
+      <section class="section">
+        <h2 class="section-title">Все фильмы</h2>
+        <div class="movie-grid" id="mainGrid"></div>
+        <div class="loader-wrap" id="loader" style="display:none">
+          <div class="loader"></div>
+        </div>
+      </section>
+    </div>
+  </main>
 
-<footer class="footer">
-  <div class="container">
-    <div class="footer-grid">
-      <div class="footer-brand">
-        <h3>🎬 CineVault</h3>
-        <p>Лучший онлайн-кинотеатр с огромной коллекцией фильмов, сериалов и аниме. Смотри где угодно и когда угодно.</p>
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <h3>🎬 CineVault</h3>
+          <p>Лучший онлайн-кинотеатр с огромной коллекцией фильмов, сериалов и аниме. Смотри где угодно и когда угодно.
+          </p>
+        </div>
+        <div class="footer-col">
+          <h4>Контент</h4>
+          <ul class="footer-links">
+            <li><a href="/genres.html">Фильмы</a></li>
+            <li><a href="/search.html?new=1">Новинки</a></li>
+            <li><a href="/search.html?sort=rating">Топ рейтинга</a></li>
+            <li><a href="/genres.html">Жанры</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Аккаунт</h4>
+          <ul class="footer-links">
+            <li><a href="/auth.html">Войти</a></li>
+            <li><a href="/auth.html?tab=register">Регистрация</a></li>
+            <li><a href="/account.html">Профиль</a></li>
+            <li><a href="/account.html#watchlist">Список</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Помощь</h4>
+          <ul class="footer-links">
+            <li><a href="#">О нас</a></li>
+            <li><a href="#">Контакты</a></li>
+            <li><a href="#">Конфиденциальность</a></li>
+            <li><a href="#">Условия</a></li>
+          </ul>
+        </div>
       </div>
-      <div class="footer-col">
-        <h4>Контент</h4>
-        <ul class="footer-links">
-          <li><a href="/genres.html">Фильмы</a></li>
-          <li><a href="/search.html?new=1">Новинки</a></li>
-          <li><a href="/search.html?sort=rating">Топ рейтинга</a></li>
-          <li><a href="/genres.html">Жанры</a></li>
-        </ul>
-      </div>
-      <div class="footer-col">
-        <h4>Аккаунт</h4>
-        <ul class="footer-links">
-          <li><a href="/auth.html">Войти</a></li>
-          <li><a href="/auth.html?tab=register">Регистрация</a></li>
-          <li><a href="/account.html">Профиль</a></li>
-          <li><a href="/account.html#watchlist">Список</a></li>
-        </ul>
-      </div>
-      <div class="footer-col">
-        <h4>Помощь</h4>
-        <ul class="footer-links">
-          <li><a href="#">О нас</a></li>
-          <li><a href="#">Контакты</a></li>
-          <li><a href="#">Конфиденциальность</a></li>
-          <li><a href="#">Условия</a></li>
-        </ul>
+      <div class="footer-bottom">
+        <span>© 2024 CineVault. Все права защищены.</span>
+        <span>Только для образовательных целей</span>
       </div>
     </div>
-    <div class="footer-bottom">
-      <span>© 2024 CineVault. Все права защищены.</span>
-      <span>Только для образовательных целей</span>
-    </div>
-  </div>
-</footer>
+  </footer>
 
-<div class="toast-container" id="toastContainer"></div>
+  <div class="toast-container" id="toastContainer"></div>
 
-<script src="/js/data.js"></script>
-<script src="/js/api.js"></script>
-<script>
-// Header auth
-const user = getCurrentUser();
-if(user) document.getElementById('authBtn').outerHTML=`<a href="/account.html" class="btn btn-ghost btn-sm">👤 ${user.name}</a>`;
+  <script src="/js/data.js"></script>
+  <script src="/js/api.js"></script>
+  <script>
+    // Header auth
+    const user = getCurrentUser();
+    if (user) document.getElementById('authBtn').outerHTML = `<a href="/account.html" class="btn btn-ghost btn-sm">👤 ${user.name}</a>`;
 
-// Burger menu
-const burgerBtn = document.getElementById('burgerBtn');
-const menuDropdown = document.getElementById('menuDropdown');
-burgerBtn.addEventListener('click',e=>{e.stopPropagation();menuDropdown.classList.toggle('open')});
-document.addEventListener('click',()=>menuDropdown.classList.remove('open'));
+    // Burger menu
+    const burgerBtn = document.getElementById('burgerBtn');
+    const menuDropdown = document.getElementById('menuDropdown');
+    burgerBtn.addEventListener('click', e => { e.stopPropagation(); menuDropdown.classList.toggle('open') });
+    document.addEventListener('click', () => menuDropdown.classList.remove('open'));
 
-// Header search
-document.getElementById('headerSearch').addEventListener('keydown',e=>{
-  if(e.key==='Enter'){window.location.href=`/search.html?q=${encodeURIComponent(e.target.value)}`}
-});
+    // Header search
+    document.getElementById('headerSearch').addEventListener('keydown', e => {
+      if (e.key === 'Enter') { window.location.href = `/search.html?q=${encodeURIComponent(e.target.value)}` }
+    });
 
-// Hero — GET /api/movies/featured
-async function renderHero(){
-  const featured = await apiGetFeatured();
-  const m = featured[Math.floor(Math.random()*featured.length)];
-  document.getElementById('heroSection').innerHTML=`
+    // Hero — GET /api/movies/featured
+    async function renderHero() {
+      const featured = await apiGetFeatured();
+      const m = featured[Math.floor(Math.random() * featured.length)];
+      document.getElementById('heroSection').innerHTML = `
     <img class="hero-img" src="${m.backdrop}" alt="${m.title}" onerror="this.src='https://picsum.photos/seed/${m.id}bg/1400/600'">
     <div class="hero-overlay"></div>
     <div class="hero-content">
@@ -198,21 +216,21 @@ async function renderHero(){
         <a href="/movie.html?id=${m.id}" class="btn btn-ghost">ℹ Подробнее</a>
       </div>
     </div>`;
-}
+    }
 
-// Movie card
-function movieCard(m){
-  const inWl = isInWatchlist(m.id);
-  return `<div class="movie-card" onclick="location.href='/movie.html?id=${m.id}'">
+    // Movie card
+    function movieCard(m) {
+      const inWl = isInWatchlist(m.id);
+      return `<div class="movie-card" onclick="location.href='/movie.html?id=${m.id}'">
     <img class="card-poster" src="${m.poster}" alt="${m.title}" loading="lazy" onerror="this.style.background='linear-gradient(135deg,${m.gradientFrom},${m.gradientTo})'">
-    ${m.isNew?'<span class="card-badge badge-new">NEW</span>':m.isPopular?'<span class="card-badge badge-hot">HOT</span>':''}
+    ${m.isNew ? '<span class="card-badge badge-new">NEW</span>' : m.isPopular ? '<span class="card-badge badge-hot">HOT</span>' : ''}
     <span class="card-rating">★ ${m.rating}</span>
     <div class="card-overlay">
       <div class="card-overlay-title">${m.title}</div>
       <div class="card-overlay-meta"><span>${m.year}</span><span>${formatDuration(m.duration)}</span></div>
       <div class="card-overlay-btns">
         <a href="/movie.html?id=${m.id}" class="btn btn-primary btn-sm" onclick="event.stopPropagation()">▶ Смотреть</a>
-        <button class="watchlist-btn ${inWl?'active':''}" onclick="event.stopPropagation();toggleWl(${m.id},this)" title="В список">${inWl?'🔖':'＋'}</button>
+        <button class="watchlist-btn ${inWl ? 'active' : ''}" onclick="event.stopPropagation();toggleWl(${m.id},this)" title="В список">${inWl ? '🔖' : '＋'}</button>
       </div>
     </div>
     <div class="card-info">
@@ -220,111 +238,136 @@ function movieCard(m){
       <div class="card-sub">${m.year} · ${m.genres[0]}</div>
     </div>
   </div>`;
-}
+    }
 
-function toggleWl(id,btn){
-  const added = toggleWatchlist(id);
-  btn.classList.toggle('active',added);
-  btn.textContent = added ? '🔖' : '＋';
-  showToast(added ? '🔖 Добавлено в список' : 'Удалено из списка', added ? 'success' : '');
-}
+    function toggleWl(id, btn) {
+      const added = toggleWatchlist(id);
+      btn.classList.toggle('active', added);
+      btn.textContent = added ? '🔖' : '＋';
+      showToast(added ? '🔖 Добавлено в список' : 'Удалено из списка', added ? 'success' : '');
+    }
 
-// Toast
-function showToast(msg, type=''){
-  const t = document.createElement('div');
-  t.className = `toast ${type?'toast-'+type:''}`;
-  t.innerHTML = `<span class="toast-icon">${type==='success'?'✅':'ℹ'}</span><span>${msg}</span>`;
-  document.getElementById('toastContainer').appendChild(t);
-  setTimeout(()=>t.remove(), 3000);
-}
+    // Toast
+    function showToast(msg, type = '') {
+      const t = document.createElement('div');
+      t.className = `toast ${type ? 'toast-' + type : ''}`;
+      t.innerHTML = `<span class="toast-icon">${type === 'success' ? '✅' : 'ℹ'}</span><span>${msg}</span>`;
+      document.getElementById('toastContainer').appendChild(t);
+      setTimeout(() => t.remove(), 3000);
+    }
 
-// Filters
-let activeGenre = '', currentPage = 0, filteredMovies = [];
+    // Filters
+    let activeGenre = '', isLoadingMore = false, hasMore = true;
+    const PAGE_SIZE = 20;
 
-function renderGenres(){
-  const genres = ['Все', ...GENRES];
-  document.getElementById('genreScroll').innerHTML = genres.map(g=>
-    `<button class="genre-pill ${g==='Все'&&!activeGenre?'active':g===activeGenre?'active':''}" onclick="setGenre('${g==='Все'?'':g}')">${g}</button>`
-  ).join('');
-}
+    function renderGenres() {
+      const genres = ['Все', ...GENRES];
+      document.getElementById('genreScroll').innerHTML = genres.map(g =>
+        `<button class="genre-pill ${g === 'Все' && !activeGenre ? 'active' : g === activeGenre ? 'active' : ''}" onclick="setGenre('${g === 'Все' ? '' : g}')">${g}</button>`
+      ).join('');
+    }
 
-function setGenre(g){
-  activeGenre = g;
-  applyFilters();
-  renderGenres();
-}
+    function setGenre(g) {
+      activeGenre = g;
+      applyFilters();
+      renderGenres();
+    }
 
-document.getElementById('ratingRange').addEventListener('input', function(){
-  document.getElementById('ratingVal').textContent = this.value > 0 ? this.value + '+' : '0+';
-  applyFilters();
-});
-document.getElementById('ageSelect').addEventListener('change', applyFilters);
-document.getElementById('yearFrom').addEventListener('change', applyFilters);
-document.getElementById('yearTo').addEventListener('change', applyFilters);
-document.getElementById('sortBy').addEventListener('change', applyFilters);
-document.getElementById('resetFilters').addEventListener('click',()=>{
-  activeGenre='';
-  document.getElementById('ratingRange').value=0;
-  document.getElementById('ratingVal').textContent='0+';
-  document.getElementById('ageSelect').value='';
-  document.getElementById('yearFrom').value='';
-  document.getElementById('yearTo').value='';
-  document.getElementById('sortBy').value='popular';
-  renderGenres();
-  applyFilters();
-});
+    document.getElementById('ratingRange').addEventListener('input', function () {
+      document.getElementById('ratingVal').textContent = this.value > 0 ? this.value + '+' : '0+';
+      applyFilters();
+    });
+    document.getElementById('ageSelect').addEventListener('change', applyFilters);
+    document.getElementById('yearFrom').addEventListener('change', applyFilters);
+    document.getElementById('yearTo').addEventListener('change', applyFilters);
+    document.getElementById('sortBy').addEventListener('change', applyFilters);
+    document.getElementById('resetFilters').addEventListener('click', () => {
+      activeGenre = '';
+      document.getElementById('ratingRange').value = 0;
+      document.getElementById('ratingVal').textContent = '0+';
+      document.getElementById('ageSelect').value = '';
+      document.getElementById('yearFrom').value = '';
+      document.getElementById('yearTo').value = '';
+      document.getElementById('sortBy').value = 'popular';
+      renderGenres();
+      applyFilters();
+    });
 
-// GET /api/movies с фильтрами
-async function applyFilters(){
-  currentPage = 0;
-  filteredMovies = await apiGetMovies({
-    genre: activeGenre,
-    ageRating: document.getElementById('ageSelect').value,
-    yearFrom: document.getElementById('yearFrom').value,
-    yearTo: document.getElementById('yearTo').value,
-    minRating: document.getElementById('ratingRange').value > 0 ? document.getElementById('ratingRange').value : '',
-    sortBy: document.getElementById('sortBy').value
-  });
-  document.getElementById('mainGrid').innerHTML = '';
-  loadMoreMovies();
-}
+    // Возвращает id последней карточки в гриде (для cursor)
+    function getLastId(gridId) {
+      const cards = document.getElementById(gridId).querySelectorAll('.movie-card[data-id]');
+      if (!cards.length) return null;
+      return parseInt(cards[cards.length - 1].dataset.id);
+    }
 
-function loadMoreMovies(){
-  const perPage = 8, start = currentPage * perPage;
-  const chunk = filteredMovies.slice(start, start + perPage);
-  if(!chunk.length) return;
-  const grid = document.getElementById('mainGrid');
-  chunk.forEach(m => { grid.insertAdjacentHTML('beforeend', movieCard(m)); });
-  currentPage++;
-}
+    // Добавляет карточки в грид с data-id для cursor
+    function appendCards(gridId, movies) {
+      const grid = document.getElementById(gridId);
+      movies.forEach(m => {
+        const wrap = document.createElement('div');
+        wrap.innerHTML = movieCard(m);
+        const card = wrap.firstElementChild;
+        card.dataset.id = m.id;
+        grid.appendChild(card);
+      });
+    }
 
-// Infinite scroll
-const observer = new IntersectionObserver(entries=>{
-  if(entries[0].isIntersecting){
-    const loader = document.getElementById('loader');
-    loader.style.display='flex';
-    setTimeout(()=>{ loadMoreMovies(); loader.style.display='none'; }, 600);
-  }
-},{threshold:0.1});
+    // GET /api/movies — сброс и первая страница
+    async function applyFilters() {
+      hasMore = true;
+      isLoadingMore = false;
+      document.getElementById('mainGrid').innerHTML = '';
+      await loadMoreMovies();
+    }
 
-// Init — вызывает API endpoints
-async function init(){
-  renderHero();
-  renderGenres();
-  // GET /api/movies/popular
-  const popular = await apiGetPopular();
-  document.getElementById('popularGrid').innerHTML = popular.slice(0,6).map(movieCard).join('');
-  // GET /api/movies/new
-  const newMovies = await apiGetNew();
-  document.getElementById('newGrid').innerHTML = newMovies.slice(0,6).map(movieCard).join('');
-  // GET /api/movies (все)
-  filteredMovies = await apiGetMovies();
-  document.getElementById('mainGrid').innerHTML = '';
-  loadMoreMovies();
-  setTimeout(()=> observer.observe(document.getElementById('loader')), 500);
-  document.getElementById('loader').style.display = 'flex';
-}
-init();
-</script>
+    // GET /api/movies?lastId=... — следующая страница
+    async function loadMoreMovies() {
+      if (isLoadingMore || !hasMore) return;
+      isLoadingMore = true;
+
+      const lastId = getLastId('mainGrid');
+      const batch = await apiGetMovies({
+        genre: activeGenre,
+        ageRating: document.getElementById('ageSelect').value,
+        yearFrom: document.getElementById('yearFrom').value,
+        yearTo: document.getElementById('yearTo').value,
+        minRating: document.getElementById('ratingRange').value > 0 ? document.getElementById('ratingRange').value : '',
+        sortBy: document.getElementById('sortBy').value,
+        lastId: lastId,
+        pageSize: PAGE_SIZE
+      });
+
+      appendCards('mainGrid', batch);
+      if (batch.length < PAGE_SIZE) hasMore = false;
+      isLoadingMore = false;
+    }
+
+    // Infinite scroll
+    const observer = new IntersectionObserver(async entries => {
+      if (entries[0].isIntersecting && !isLoadingMore && hasMore) {
+        const loader = document.getElementById('loader');
+        loader.style.display = 'flex';
+        await loadMoreMovies();
+        loader.style.display = 'none';
+      }
+    }, { threshold: 0.1 });
+
+    // Init — вызывает API endpoints
+    async function init() {
+      renderHero();
+      renderGenres();
+      // GET /popular
+      const popular = await apiGetPopular();
+      appendCards('popularGrid', popular.slice(0, 6));
+      // GET /api/movies/new
+      const newMovies = await apiGetNew();
+      appendCards('newGrid', newMovies.slice(0, 6));
+      // GET /api/movies — первая страница
+      await applyFilters();
+      observer.observe(document.getElementById('loader'));
+    }
+    init();
+  </script>
 </body>
+
 </html>
