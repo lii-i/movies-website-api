@@ -5,6 +5,7 @@ public static class MoviesEndPoints{
         var movieGroup = app.MapGroup("/api/movies");
         
         movieGroup.MapGet("/", async ([FromServices] IRepository rep,
+            [FromServices] IAgregatorApiService apiAgregator,
             [FromQuery] string[]? genres,
             [FromQuery] int? ageRating,
             [FromQuery] int? yearFrom,
@@ -17,7 +18,7 @@ public static class MoviesEndPoints{
             if(!pageSize.HasValue) pageSize = 20;
             
             List<FilmEntity> films = await rep.GetFilmsFilter(genres, ageRating, yearFrom, yearTo, minRating, null, sortBy, lastId, pageSize.Value);
-            
+
             DateOnly currentDate = DateOnly.FromDateTime(DateTime.UtcNow);
             double averageRequest = await rep.GetRequestAverage();
             

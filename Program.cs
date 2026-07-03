@@ -7,6 +7,10 @@ public class Program {
 
         builder.Services.AddDbContext<CinemaDbContext>(options => options.UseNpgsql(Config.GetConnectionString("PostgreSql"))); 
         builder.Services.AddScoped<IRepository,Repository>();
+        builder.Services.AddSingleton<IAgregatorApiService, ApiKodik>(delProvider => {
+            // потом еще логгер надо зарегать
+            return new ApiKodik(Config["Tokens:Kodik"]);
+        });
         var app = builder.Build();
 
         if (app.Environment.IsDevelopment())
@@ -22,6 +26,7 @@ public class Program {
         app.UseDefaultFiles();   
         app.UseStaticFiles();   
 
+        app.AddMoviesEndPoints();
         app.Run();
     }
 }

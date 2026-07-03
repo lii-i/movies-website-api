@@ -7,7 +7,7 @@ public class CinemaDbContext : DbContext
     public DbSet<ActorEntity> Actors { get; set; }
     public DbSet<UserEntity> Users { get; set; }
     public DbSet<WatchListUserEntity> WatchListUsers { get; set; }
-
+    public DbSet<SystemSettingsEntity> SystemSettings { get; set; }
     public CinemaDbContext(DbContextOptions<CinemaDbContext> options) : base(options) 
     {
     }
