@@ -77,6 +77,42 @@ public static class MoviesEndPoints{
             return TypedResults.Ok(movies);
         });
 
+        app.MapGet("/popular", 
+        async (
+            [FromServices] IRepository rep,
+            [FromQuery] int? lastId,
+            [FromQuery] int? pageSize
+        )=>{
+           if(!pageSize.HasValue){
+            pageSize = 20;
+           }
+
+           List<FilmEntity> PopularFilms = await rep.GetPopularFilms(lastId, pageSize.Value);
+           
+           DateOnly currentDate = DateOnly.FromDateTime(DateTime.UtcNow);
+           
+           List<MovieDTO> movies = PopularFilms.Select(f => new MovieDTO {
+                Id = f.Id, 
+                Title = f.Title, 
+                OriginalTitle = f.OriginalTitle, 
+                DateRelease = f.DateRelease,
+                Genres = f.Genres, 
+                Rating = f.Rating,
+                Duration = f.Duration,
+                AgeRating = f.AgeRating,
+                Country = f.Country,
+                Description = f.Description,
+                URLPoster = f.URLPoster,
+                URLBackdrop = f.URLBackdrop,
+                Cast = f.Cast.Select(a => a.Name).ToList(),
+                IsNew = currentDate.DayNumber - f.DateRelease.DayNumber <= 30,
+                IsPopular = true,
+                Featured = f.Featured,
+            }).ToList();
+
+            return TypedResults.Ok(movies);
+        });
+
         return app;
     }
 }

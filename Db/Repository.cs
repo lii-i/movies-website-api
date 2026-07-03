@@ -4,6 +4,7 @@ public interface IRepository{
     public Task<List<FilmEntity>> GetFilmsFilter(string[]? genres, int? ageRating, int? yearFrom, int? yearTo, double? minRating, bool? featured, string? sortBy, int? lastId, int pageSize);
     public Task<int?> GetRequestCount(int id);
     public Task<double> GetRequestAverage();
+    public Task<List<FilmEntity>> GetPopularFilms(int? lastId, int pageSize);
 }
 
 public class Repository:IRepository{
@@ -78,5 +79,20 @@ public class Repository:IRepository{
     public async Task<double> GetRequestAverage(){
 
         return await _db.Films.AverageAsync(f => f.RequestCount);
+    }
+
+    public async Task<List<FilmEntity>> GetPopularFilms(int? lastId, int pageSize){
+        
+        double AVG_RequestCount = await _db.Films.AverageAsync(f => (double?)f.RequestCount) ?? 0;
+
+        FilmEntity? lastFilm = null;
+        if(lastId.HasValue && lastId.Value > 0) lastFilm = await _db.Films.FirstOrDefaultAsync(f => f.Id == lastId.Value); 
+
+        IQueryable<FilmEntity> PopularFilms = _db.Films.Where(f => f.RequestCount > AVG_RequestCount);
+        if(lastFilm != null){
+            PopularFilms = PopularFilms.Where(f => (f.RequestCount < lastFilm.RequestCount) || (f.RequestCount == lastFilm.RequestCount && f.Id > lastId.Value));
+        }
+
+        return await PopularFilms.OrderByDescending(f => f.RequestCount).ThenBy(f => f.Id).Take(pageSize).ToListAsync();
     }
 }
