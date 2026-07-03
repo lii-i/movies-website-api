@@ -1,79 +1,93 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title id="pageTitle">Фильм — CineVault</title>
-<meta name="description" id="pageDesc" content="Смотри онлайн на CineVault">
-<link rel="stylesheet" href="/css/style.css">
-<style>
-.movie-bg{position:fixed;inset:0;z-index:-1;opacity:.12;background-size:cover;background-position:center;filter:blur(40px);pointer-events:none}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title id="pageTitle">Фильм — CineVault</title>
+  <meta name="description" id="pageDesc" content="Смотри онлайн на CineVault">
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .movie-bg {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      opacity: .12;
+      background-size: cover;
+      background-position: center;
+      filter: blur(40px);
+      pointer-events: none
+    }
+  </style>
 </head>
+
 <body>
-<header class="header">
-  <div class="header-left">
-    <div class="menu-wrap">
-      <button class="burger-btn" id="burgerBtn">☰</button>
-      <div class="menu-dropdown" id="menuDropdown">
-        <a href="/account.html" class="menu-item">👤 Мой профиль</a>
-        <a href="/account.html#watchlist" class="menu-item">🔖 Список просмотра</a>
-        <div class="menu-divider"></div>
-        <a href="/genres.html" class="menu-item">🎬 Жанры</a>
-        <a href="/search.html?sort=rating" class="menu-item">⭐ Топ фильмов</a>
-        <div class="menu-divider"></div>
-        <a href="#" class="menu-item danger" onclick="logout();return false">🚪 Выйти</a>
+  <header class="header">
+    <div class="header-left">
+      <div class="menu-wrap">
+        <button class="burger-btn" id="burgerBtn">☰</button>
+        <div class="menu-dropdown" id="menuDropdown">
+          <a href="/account.html" class="menu-item">👤 Мой профиль</a>
+          <a href="/account.html#watchlist" class="menu-item">🔖 Список просмотра</a>
+          <div class="menu-divider"></div>
+          <a href="/genres.html" class="menu-item">🎬 Жанры</a>
+          <a href="/search.html?sort=rating" class="menu-item">⭐ Топ фильмов</a>
+          <div class="menu-divider"></div>
+          <a href="#" class="menu-item danger" onclick="logout();return false">🚪 Выйти</a>
+        </div>
       </div>
     </div>
-  </div>
-  <a href="/index.html" class="header-logo">🎬 CineVault</a>
-  <div class="header-right">
-    <div class="header-search">
-      <span>🔍</span>
-      <input type="text" id="headerSearch" placeholder="Поиск...">
+    <a href="/index.html" class="header-logo">🎬 CineVault</a>
+    <div class="header-right">
+      <div class="header-search">
+        <span>🔍</span>
+        <input type="text" id="headerSearch" placeholder="Поиск...">
+      </div>
+      <a href="/auth.html" class="btn btn-primary btn-sm" id="authBtn">Войти</a>
     </div>
-    <a href="/auth.html" class="btn btn-primary btn-sm" id="authBtn">Войти</a>
-  </div>
-</header>
+  </header>
 
-<main class="page">
-  <div class="movie-bg" id="movieBg"></div>
-  <div class="container" style="padding-top:32px">
-    <a href="javascript:history.back()" class="back-btn">← Назад</a>
-    <div id="movieContent">
-      <div class="loader-wrap"><div class="loader"></div></div>
+  <main class="page">
+    <div class="movie-bg" id="movieBg"></div>
+    <div class="container" style="padding-top:32px">
+      <a href="javascript:history.back()" class="back-btn">← Назад</a>
+      <div id="movieContent">
+        <div class="loader-wrap">
+          <div class="loader"></div>
+        </div>
+      </div>
     </div>
-  </div>
-</main>
+  </main>
 
-<div class="toast-container" id="toastContainer"></div>
-<footer class="footer">
-  <div class="container">
-    <div class="footer-bottom">
-      <span>© 2024 CineVault</span>
-      <a href="/index.html" style="color:var(--gold)">На главную</a>
+  <div class="toast-container" id="toastContainer"></div>
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-bottom">
+        <span>© 2024 CineVault</span>
+        <a href="/index.html" style="color:var(--gold)">На главную</a>
+      </div>
     </div>
-  </div>
-</footer>
+  </footer>
 
-<script src="/js/data.js"></script>
-<script src="/js/api.js"></script>
-<script>
-const user = getCurrentUser();
-if(user) document.getElementById('authBtn').outerHTML=`<a href="/account.html" class="btn btn-ghost btn-sm">👤 ${user.name}</a>`;
-document.getElementById('burgerBtn').addEventListener('click',e=>{e.stopPropagation();document.getElementById('menuDropdown').classList.toggle('open')});
-document.addEventListener('click',()=>document.getElementById('menuDropdown').classList.remove('open'));
-document.getElementById('headerSearch').addEventListener('keydown',e=>{if(e.key==='Enter')window.location.href=`/search.html?q=${encodeURIComponent(e.target.value)}`});
+  <script src="/js/data.js"></script>
+  <script src="/js/api.js"></script>
+  <script>
+    const user = getCurrentUser();
+    if (user) document.getElementById('authBtn').outerHTML = `<a href="/account.html" class="btn btn-ghost btn-sm">👤 ${user.name}</a>`;
+    document.getElementById('burgerBtn').addEventListener('click', e => { e.stopPropagation(); document.getElementById('menuDropdown').classList.toggle('open') });
+    document.addEventListener('click', () => document.getElementById('menuDropdown').classList.remove('open'));
+    document.getElementById('headerSearch').addEventListener('keydown', e => { if (e.key === 'Enter') window.location.href = `/search.html?q=${encodeURIComponent(e.target.value)}` });
 
-function showToast(msg,type=''){
-  const t=document.createElement('div');
-  t.className=`toast ${type?'toast-'+type:''}`;
-  t.innerHTML=`<span class="toast-icon">${type==='success'?'✅':'ℹ'}</span><span>${msg}</span>`;
-  document.getElementById('toastContainer').appendChild(t);
-  setTimeout(()=>t.remove(),3000);
-}
+    function showToast(msg, type = '') {
+      const t = document.createElement('div');
+      t.className = `toast ${type ? 'toast-' + type : ''}`;
+      t.innerHTML = `<span class="toast-icon">${type === 'success' ? '✅' : 'ℹ'}</span><span>${msg}</span>`;
+      document.getElementById('toastContainer').appendChild(t);
+      setTimeout(() => t.remove(), 3000);
+    }
 
-function movieCard(m){
-  return `<div class="movie-card" onclick="location.href='/movie.html?id=${m.id}'">
+    function movieCard(m) {
+      return `<div class="movie-card" onclick="location.href='/movie.html?id=${m.id}'">
     <img class="card-poster" src="${m.poster}" alt="${m.title}" loading="lazy" onerror="this.style.background='linear-gradient(135deg,${m.gradientFrom},${m.gradientTo})'">
     <span class="card-rating">★ ${m.rating}</span>
     <div class="card-overlay">
@@ -83,16 +97,16 @@ function movieCard(m){
     </div>
     <div class="card-info"><div class="card-title">${m.title}</div><div class="card-sub">${m.year} · ${m.genres[0]}</div></div>
   </div>`;
-}
+    }
 
-function renderMovie(m, related = []){
-  document.title = `${m.title} (${m.year}) — CineVault`;
-  document.getElementById('pageDesc').content = m.description.slice(0,150);
-  document.getElementById('movieBg').style.backgroundImage = `url(${m.backdrop})`;
+    function renderMovie(m, related = []) {
+      document.title = `${m.title} (${m.year}) — CineVault`;
+      document.getElementById('pageDesc').content = m.description.slice(0, 150);
+      document.getElementById('movieBg').style.backgroundImage = `url(${m.backdrop})`;
 
-  const inWl = isInWatchlist(m.id);
+      const inWl = isInWatchlist(m.id);
 
-  document.getElementById('movieContent').innerHTML = `
+      document.getElementById('movieContent').innerHTML = `
     <div class="movie-layout">
       <div>
         <img class="movie-poster" src="${m.poster}" alt="${m.title}" onerror="this.style.background='linear-gradient(135deg,${m.gradientFrom},${m.gradientTo})'">
@@ -113,7 +127,7 @@ function renderMovie(m, related = []){
         <div class="original-title">${m.originalTitle} · ${m.year}</div>
         <div class="movie-badges">
           <span class="badge badge-age">${m.ageRating}</span>
-          ${m.genres.map(g=>`<span class="badge badge-genre">${g}</span>`).join('')}
+          ${m.genres.map(g => `<span class="badge badge-genre">${g}</span>`).join('')}
         </div>
         <div class="movie-meta-table">
           <span class="meta-key">Режиссёр</span><span class="meta-val">${m.director}</span>
@@ -127,7 +141,7 @@ function renderMovie(m, related = []){
         <p class="movie-desc">${m.description}</p>
         <div class="movie-actions">
           <a href="#player" class="btn btn-primary">▶ Смотреть</a>
-          <button class="btn btn-ghost" id="wlBtn" onclick="toggleWl(${m.id})">${inWl?'🔖 В списке':'＋ В список'}</button>
+          <button class="btn btn-ghost" id="wlBtn" onclick="toggleWl(${m.id})">${inWl ? '🔖 В списке' : '＋ В список'}</button>
           <button class="btn btn-ghost btn-icon" title="Поделиться" onclick="navigator.share&&navigator.share({title:'${m.title}',url:location.href})">🔗</button>
         </div>
       </div>
@@ -157,44 +171,45 @@ function renderMovie(m, related = []){
       <div class="movie-grid">${related.map(movieCard).join('')}</div>
     </div>` : ''}
   `;
-}
+    }
 
-function toggleWl(id){
-  const added = toggleWatchlist(id);
-  document.getElementById('wlBtn').textContent = added ? '🔖 В списке' : '＋ В список';
-  showToast(added ? '🔖 Добавлено в список просмотра' : 'Удалено из списка', added ? 'success' : '');
-}
+    function toggleWl(id) {
+      const added = toggleWatchlist(id);
+      document.getElementById('wlBtn').textContent = added ? '🔖 В списке' : '＋ В список';
+      showToast(added ? '🔖 Добавлено в список просмотра' : 'Удалено из списка', added ? 'success' : '');
+    }
 
-function loadPlayer(id){
-  const m = getMovieById(id);
-  document.getElementById('playerPlaceholder').style.display = 'none';
-  const iframe = document.getElementById('playerIframe');
-  iframe.style.display = 'block';
-  // В реальном API здесь был бы URL видеофайла
-  iframe.src = `about:blank`;
-  iframe.srcdoc = `<div style="width:100%;height:100%;background:#0a0a0f;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:sans-serif;color:#fff;gap:16px">
+    function loadPlayer(id) {
+      const m = getMovieById(id);
+      document.getElementById('playerPlaceholder').style.display = 'none';
+      const iframe = document.getElementById('playerIframe');
+      iframe.style.display = 'block';
+      // В реальном API здесь был бы URL видеофайла
+      iframe.src = `about:blank`;
+      iframe.srcdoc = `<div style="width:100%;height:100%;background:#0a0a0f;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:sans-serif;color:#fff;gap:16px">
     <div style="font-size:4rem">🎬</div>
     <div style="font-size:1.2rem;font-weight:700">${m.title}</div>
     <div style="color:#9898b2;font-size:.9rem">Здесь будет видеоплеер из API</div>
     <div style="font-size:.8rem;color:#55556a;margin-top:8px">iframe src="https://api.cinevault.ru/embed/${id}"</div>
   </div>`;
-}
+    }
 
-// Load movie — GET /api/movies/:id + GET /api/movies/:id/related
-const params = new URLSearchParams(location.search);
-const id = params.get('id');
-async function loadMovie(){
-  if(!id){ document.getElementById('movieContent').innerHTML='<div class="no-results"><div class="no-results-icon">🎬</div><h2>Фильм не найден</h2><a href="/index.html" class="btn btn-primary" style="margin-top:16px">На главную</a></div>'; return; }
-  try {
-    const movie = await apiGetMovie(id);
-    if(!movie){ throw new Error('not found'); }
-    const related = await apiGetRelated(id);
-    renderMovie(movie, related);
-  } catch(e){
-    document.getElementById('movieContent').innerHTML='<div class="no-results"><div class="no-results-icon">🎬</div><h2>Фильм не найден</h2><a href="/index.html" class="btn btn-primary" style="margin-top:16px">На главную</a></div>';
-  }
-}
-loadMovie();
-</script>
+    // Load movie — GET /api/movies/:id + GET /api/movies/:id/related
+    const params = new URLSearchParams(location.search);
+    const id = params.get('id');
+    async function loadMovie() {
+      if (!id) { document.getElementById('movieContent').innerHTML = '<div class="no-results"><div class="no-results-icon">🎬</div><h2>Фильм не найден</h2><a href="/index.html" class="btn btn-primary" style="margin-top:16px">На главную</a></div>'; return; }
+      try {
+        const movie = await apiGetMovie(id);
+        if (!movie) { throw new Error('not found'); }
+        const related = await apiGetRelated(id);
+        renderMovie(movie, related);
+      } catch (e) {
+        document.getElementById('movieContent').innerHTML = '<div class="no-results"><div class="no-results-icon">🎬</div><h2>Фильм не найден</h2><a href="/index.html" class="btn btn-primary" style="margin-top:16px">На главную</a></div>';
+      }
+    }
+    loadMovie();
+  </script>
 </body>
+
 </html>
