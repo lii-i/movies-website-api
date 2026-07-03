@@ -8,7 +8,7 @@ public class WatchListUserConfiguration : IEntityTypeConfiguration<WatchListUser
         builder.HasKey(w => new { w.UserId, w.FilmId });
 
         builder.HasOne(w => w.User)
-               .WithMany(u => u.watchlist)
+               .WithMany(u => u.WatchlistItems)
                .HasForeignKey(w => w.UserId)
                .OnDelete(DeleteBehavior.Cascade);
 

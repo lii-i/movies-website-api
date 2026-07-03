@@ -1,17 +1,18 @@
 public record MovieDTO {
-    public int Id {get; set;}
-    public string Title {get; set;}
-    public string OriginalTitle {get; set;}
-    public DateOnly DateRelease {get; set;}
-    public List<GenreEntity> Genres {get; set;}
-    public float Rating {get; set;}
-    public int Duration {get; set;}
-    public int AgeRating {get; set;}
-    public string Country {get; set;}
-    public string Description {get; set;}
-    public string URLPoster {get; set;}
-    public string URLbackdrop {get; set;}
-    public bool IsNew {get; set;}
-    public bool IsPopular {get; set;}
-    public bool Featured {get; set;}
+    public int Id {get; init;}
+    public string Title {get; init;} = string.Empty;
+    public string OriginalTitle {get; init;} = string.Empty;
+    public DateOnly DateRelease {get; init;}
+    public List<GenreEntity> Genres {get; init;} = new();
+    public double Rating {get; init;}
+    public int Duration {get; init;}
+    public int AgeRating {get; init;}
+    public string Country {get; init;} = string.Empty;
+    public string Description {get; init;} = string.Empty;
+    public string URLPoster {get; init;} = string.Empty;
+    public string URLBackdrop {get; init;} = string.Empty;
+    public List<string> Cast {get; init;} = new();
+    public bool IsNew {get; init;}
+    public bool IsPopular {get; init;}
+    public bool Featured {get; init;}
 }

@@ -7,10 +7,9 @@ public class UserConfiguration : IEntityTypeConfiguration<UserEntity>
     {
         builder.HasKey(u => u.Id);
 
-        // Логин должен быть обязательным, уникальным и не очень длинным
-        builder.Property(u => u.login).IsRequired().HasMaxLength(50);
-        builder.HasIndex(u => u.login).IsUnique();
+        builder.Property(u => u.Login).IsRequired().HasMaxLength(50);
+        builder.HasIndex(u => u.Login).IsUnique();
 
-        builder.Property(u => u.password).IsRequired();
+        builder.Property(u => u.Password).IsRequired();
     }
 }

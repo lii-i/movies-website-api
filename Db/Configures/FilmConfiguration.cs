@@ -10,14 +10,8 @@ public class FilmConfiguration : IEntityTypeConfiguration<FilmEntity>
         builder.Property(f => f.Title).IsRequired().HasMaxLength(250);
         builder.Property(f => f.OriginalTitle).HasMaxLength(250);
 
-        builder.HasMany(f => f.genres)
+        builder.HasMany(f => f.Genres)
                .WithMany(g => g.Films)
                .UsingEntity(j => j.ToTable("FilmGenres"));
-
-        builder.Property(f => f.Cast)
-               .HasConversion(
-                   v => string.Join(',', v),
-                   v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList()
-               );
     }
 }
