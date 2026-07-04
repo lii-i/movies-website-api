@@ -4,18 +4,35 @@ public static class MoviesEndPoints{
     public static WebApplication AddMoviesEndPoints(this WebApplication app){
         var movieGroup = app.MapGroup("/api/movies");
         
-        movieGroup.MapGet("/", async (//[FromServices] IRepository rep,
+        movieGroup.MapGet("/", async (//FromServices] IRepository rep,
             [FromServices] IAgregatorApiService apiAgregator,
-            [FromQuery] string[]? genres,
-            [FromQuery] int? ageRating,
-            [FromQuery] int? yearFrom,
-            [FromQuery] int? yearTo,
-            [FromQuery] double? minRating,
-            [FromQuery] string? sortBy,
-            [FromQuery] int? lastId,
-            [FromQuery] int? pageSize) =>
+            [FromQuery] string? title = null,
+            [FromQuery] string? titleOrig = null,
+            [FromQuery] string? types = null,
+            [FromQuery] int? year = null,
+            [FromQuery] bool? lgbt = null,
+            [FromQuery] int? translationId = null,
+            [FromQuery] string? translationType = null,
+            [FromQuery] string? KinopoiskId = null,
+            [FromQuery] string? ImdbId = null,
+            [FromQuery] string? ShikimoriId = null,
+            [FromQuery] string? AnimeKind = null,
+            [FromQuery] int? episode = null,
+            [FromQuery] string? animeStatus = null,
+            [FromQuery] string? ratingMpaa = null,
+            [FromQuery] int? duration = null,
+            [FromQuery] double? kinopoiskRating = null,
+            [FromQuery] double? ImdbRating = null,
+            [FromQuery] double? shikimoriRating = null,
+            [FromQuery] int? minimalAge = null,
+            [FromQuery] int? lastId = null,
+            [FromQuery] int? pageSize = null
+            ) =>
         {
             if(!pageSize.HasValue) pageSize = 20;
+
+            apiAgregator.SearchList();
+
 
            
         });

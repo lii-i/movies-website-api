@@ -50,9 +50,9 @@ public class CinemaDbContext : DbContext
         modelBuilder.Entity<AnimeStudiosVideo>()
             .HasOne<VideoItems>().WithMany().HasForeignKey(x => x.IdVideoItem);
 
-        modelBuilder.Entity<CountriesCreated>()
+        modelBuilder.Entity<VideoCountries>()
             .HasOne<Countries>().WithMany().HasForeignKey(x => x.IdCountry);
-        modelBuilder.Entity<CountriesCreated>()
+        modelBuilder.Entity<VideoCountries>()
             .HasOne<VideoItems>().WithMany().HasForeignKey(x => x.IdVideoItem);
 
         modelBuilder.Entity<BlockedCountries>()
