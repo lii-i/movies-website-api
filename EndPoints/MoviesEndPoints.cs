@@ -6,21 +6,18 @@ public static class MoviesEndPoints{
         
         movieGroup.MapGet("/", async (//FromServices] IRepository rep,
             [FromServices] IAgregatorApiService apiAgregator,
-            [FromQuery] string? title = null,
-            [FromQuery] string? titleOrig = null,
             [FromQuery] string? types = null,
             [FromQuery] int? year = null,
             [FromQuery] bool? lgbt = null,
             [FromQuery] int? translationId = null,
             [FromQuery] string? translationType = null,
-            [FromQuery] string? KinopoiskId = null,
-            [FromQuery] string? ImdbId = null,
-            [FromQuery] string? ShikimoriId = null,
             [FromQuery] string? AnimeKind = null,
             [FromQuery] int? episode = null,
             [FromQuery] string? animeStatus = null,
             [FromQuery] string? ratingMpaa = null,
             [FromQuery] int? duration = null,
+            [FromQuery] string? animeStudios = null,
+            [FromQuery] string? genres = null,
             [FromQuery] double? kinopoiskRating = null,
             [FromQuery] double? ImdbRating = null,
             [FromQuery] double? shikimoriRating = null,
@@ -31,10 +28,28 @@ public static class MoviesEndPoints{
         {
             if(!pageSize.HasValue) pageSize = 20;
 
-            apiAgregator.SearchList();
+           KodikSearchResponse response = await apiAgregator.SearchList(
+            limit: pageSize,
+            types: types,
+            year: year,
+            lgbt: lgbt,
+            animeKind: AnimeKind,
+            animeStatus: animeStatus,
+            ratingMpaa: ratingMpaa,
+            minimalAge: minimalAge,
+            duration: duration,
+            translationId: translationId,
+            translationType: translationType,
+            animeStudios: animeStudios, 
+            genres: genres,             
+            kinopoiskRating: kinopoiskRating, 
+            imdbRating: ImdbRating,           
+            shikimoriRating: shikimoriRating, 
+            episode: episode
+        );
 
+        return TypedResults.Ok(response);
 
-           
         });
 
         movieGroup.MapGet("/featured", async (//[FromServices] IRepository rep,

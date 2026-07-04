@@ -221,3 +221,4 @@ public class KodikMaterialData
     [JsonPropertyName("operators")]
     public List<string> Operators { get; set; } = new();
 }
+
