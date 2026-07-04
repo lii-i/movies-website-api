@@ -16,7 +16,7 @@ public class CinemaDbContext : DbContext
     public DbSet<AnimeStudios> AnimeStudios { get; set; }
     public DbSet<AnimeStudiosVideo> AnimeStudiosVideo { get; set; }
     public DbSet<Countries> Countries { get; set; }
-    public DbSet<CountriesCreated> VideoCountries { get; set; }
+    public DbSet<VideoCountries> VideoCountries { get; set; }
     public DbSet<BlockedCountries> BlockedCountries { get; set; }
     public DbSet<BlockedSeasons> BlockedSeasons { get; set; }
     public DbSet<Screenshots> Screenshots { get; set; }
