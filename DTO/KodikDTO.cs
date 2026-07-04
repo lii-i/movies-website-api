@@ -1,7 +1,9 @@
 using System.Text.Json.Serialization;
+using System.Collections.Generic;
 
 public class KodikSearchResponse
 {
+    
     [JsonPropertyName("time")]
     public string? Time { get; set; }
 
@@ -47,6 +49,9 @@ public class KodikItem
     [JsonPropertyName("imdb_id")]
     public string? ImdbId { get; set; }
 
+    [JsonPropertyName("worldart_link")]
+    public string? WorldartLink { get; set; }
+
     [JsonPropertyName("link")]
     public string Link { get; set; } = string.Empty;
 
@@ -68,6 +73,9 @@ public class KodikAdditionalData
     [JsonPropertyName("blocked_countries")]
     public List<string> BlockedCountries { get; set; } = new();
 
+    [JsonPropertyName("blocked_seasons")]
+    public Dictionary<string, object>? BlockedSeasons { get; set; } 
+
     // Только для сериалов
     [JsonPropertyName("last_season")]
     public int? LastSeason { get; set; }
@@ -86,6 +94,33 @@ public class KodikMaterialData
 
     [JsonPropertyName("anime_title")]
     public string? AnimeTitle { get; set; }
+
+    [JsonPropertyName("title_en")]
+    public string? TitleEn { get; set; }
+
+    [JsonPropertyName("other_titles")]
+    public List<string> OtherTitles { get; set; } = new();
+
+    [JsonPropertyName("other_titles_en")]
+    public List<string> OtherTitlesEn { get; set; } = new();
+
+    [JsonPropertyName("other_titles_jp")]
+    public List<string> OtherTitlesJp { get; set; } = new();
+
+    [JsonPropertyName("anime_kind")]
+    public string? AnimeKind { get; set; }
+
+    [JsonPropertyName("all_status")]
+    public string? AllStatus { get; set; }
+
+    [JsonPropertyName("anime_status")]
+    public string? AnimeStatus { get; set; }
+
+    [JsonPropertyName("year")]
+    public int? Year { get; set; }
+
+    [JsonPropertyName("tagline")]
+    public string? Tagline { get; set; }
 
     [JsonPropertyName("description")]
     public string? Description { get; set; }
@@ -135,11 +170,32 @@ public class KodikMaterialData
     [JsonPropertyName("shikimori_rating")]
     public double? ShikimoriRating { get; set; }
 
+    [JsonPropertyName("shikimori_votes")]
+    public int? ShikimoriVotes { get; set; }
+
+    [JsonPropertyName("premiere_ru")]
+    public string? PremiereRu { get; set; }
+
+    [JsonPropertyName("premiere_world")]
+    public string? PremiereWorld { get; set; }
+
+    [JsonPropertyName("aired_at")]
+    public string? AiredAt { get; set; }
+
+    [JsonPropertyName("released_at")]
+    public string? ReleasedAt { get; set; }
+
+    [JsonPropertyName("rating_mpaa")]
+    public string? RatingMpaa { get; set; }
+
     [JsonPropertyName("minimal_age")]
     public int? MinimalAge { get; set; }
 
     [JsonPropertyName("episodes_total")]
     public int? EpisodesTotal { get; set; }
+
+    [JsonPropertyName("episodes_aired")]
+    public int? EpisodesAired { get; set; }
 
     [JsonPropertyName("actors")]
     public List<string> Actors { get; set; } = new();
@@ -147,12 +203,21 @@ public class KodikMaterialData
     [JsonPropertyName("directors")]
     public List<string> Directors { get; set; } = new();
 
-    [JsonPropertyName("anime_kind")]
-    public string? AnimeKind { get; set; }
+    [JsonPropertyName("producers")]
+    public List<string> Producers { get; set; } = new();
 
-    [JsonPropertyName("premiere_world")]
-    public string? PremiereWorld { get; set; }
+    [JsonPropertyName("writers")]
+    public List<string> Writers { get; set; } = new();
 
-    [JsonPropertyName("tagline")]
-    public string? Tagline { get; set; }
+    [JsonPropertyName("composers")]
+    public List<string> Composers { get; set; } = new();
+
+    [JsonPropertyName("editors")]
+    public List<string> Editors { get; set; } = new();
+
+    [JsonPropertyName("designers")]
+    public List<string> Designers { get; set; } = new();
+
+    [JsonPropertyName("operators")]
+    public List<string> Operators { get; set; } = new();
 }

@@ -6,7 +6,7 @@ public class Program {
         var Config = builder.Configuration;
 
         builder.Services.AddDbContext<CinemaDbContext>(options => options.UseNpgsql(Config.GetConnectionString("PostgreSql"))); 
-        builder.Services.AddScoped<IRepository,Repository>();
+        //builder.Services.AddScoped<IRepository,Repository>();
         builder.Services.AddSingleton<IAgregatorApiService, ApiKodik>(delProvider => {
             // потом еще логгер надо зарегать
             return new ApiKodik(Config["Tokens:Kodik"]);
