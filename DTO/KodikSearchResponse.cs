@@ -55,15 +55,6 @@ public class KodikItem
     [JsonPropertyName("link")]
     public string Link { get; set; } = string.Empty;
 
-    [JsonPropertyName("additional_data")]
-    public KodikAdditionalData? AdditionalData { get; set; }
-
-    [JsonPropertyName("material_data")]
-    public KodikMaterialData? MaterialData { get; set; }
-}
-
-public class KodikAdditionalData
-{
     [JsonPropertyName("camrip")]
     public bool Camrip { get; set; }
 
@@ -85,12 +76,6 @@ public class KodikAdditionalData
 
     [JsonPropertyName("episodes_count")]
     public int? EpisodesCount { get; set; }
-}
-
-public class KodikMaterialData
-{
-    [JsonPropertyName("title")]
-    public string Title { get; set; } = string.Empty;
 
     [JsonPropertyName("anime_title")]
     public string? AnimeTitle { get; set; }
@@ -116,9 +101,6 @@ public class KodikMaterialData
     [JsonPropertyName("anime_status")]
     public string? AnimeStatus { get; set; }
 
-    [JsonPropertyName("year")]
-    public int? Year { get; set; }
-
     [JsonPropertyName("tagline")]
     public string? Tagline { get; set; }
 
@@ -133,9 +115,6 @@ public class KodikMaterialData
 
     [JsonPropertyName("anime_poster_url")]
     public string? AnimePosterUrl { get; set; }
-
-    [JsonPropertyName("screenshots")]
-    public List<string> Screenshots { get; set; } = new();
 
     [JsonPropertyName("duration")]
     public int? Duration { get; set; }
@@ -190,6 +169,9 @@ public class KodikMaterialData
 
     [JsonPropertyName("minimal_age")]
     public int? MinimalAge { get; set; }
+    
+    [JsonPropertyName("translation")]
+    public KodikTranslation? Translation  {get; set;}
 
     [JsonPropertyName("episodes_total")]
     public int? EpisodesTotal { get; set; }
@@ -222,3 +204,14 @@ public class KodikMaterialData
     public List<string> Operators { get; set; } = new();
 }
 
+public class KodikTranslation
+{
+    [JsonPropertyName("id")]
+    public int Id { get; set; }
+
+    [JsonPropertyName("title")]
+    public string Title { get; set; } = string.Empty;
+
+    [JsonPropertyName("type")]
+    public string Type { get; set; } = string.Empty;
+}
