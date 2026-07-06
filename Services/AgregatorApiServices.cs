@@ -3,348 +3,118 @@ using System.Threading.Tasks;
 using Flurl;
 using Flurl.Http;
 
-public interface IAgregatorApiService
+public interface IAgregatorApiService<T>
 {
-    public Task<KodikSearchResponse> Search(
-        string? title = null,
-        string? titleOrig = null,
-        string? id = null,
-        string? shikimoriId = null,
-        string? kinopoiskId = null,
-        string? imdbId = null,
-        string? mdlId = null,
-        string? worldartAnimationId = null,
-        string? worldartLink = null,
-        string? playerLink = null,
-        
-        // Уточнение поиска
-        bool? strict = null,
-        bool? fullMatch = null,
-        int? limit = null,
-        string? types = null,
-        int? year = null,
-        bool? lgbt = null,
-        string? anime_kind = null,
-        string? anime_status = null,
-        string? rating_mpaa = null,
-        int? minimal_age = null,
-        double? kinopoisk_rating = null,
-        double? imdb_rating = null,
-        double? shikimori_rating = null,
-        string? anime_studios = null,
-        string? genres = null,
-        string? anime_genres = null,
-        int? duration = null,
-        string? has_field_and = null,
-        string? prioritize_translations = null,
-        string? unprioritize_translations = null, 
-        string? block_translations = null,
-        int? season = null,
-        string? countries = null,
-
-        // Съемочная группа
-        string? actors = null,
-        string? directors = null,
-        string? producers = null,
-        string? writers = null,
-        string? composers = null,
-        string? editors = null,
-        string? designers = null,
-        string? operators = null,
-        
-        // Контентные уточнения
-        int? translationId = null,
-        string? translationType = null,
-        bool? camrip = null,
-        string? mydramalist_tags = null,
-        
-        // Дополнительные данные
-        bool? withMaterialData = null,
-        bool? withSeasons = null,
-        bool? withEpisodes = null,
-        bool? withEpisodesData = null,
-        bool? withPageLinks = null
-    );
-
-    public Task<KodikSearchResponse> SearchList(
-        // Базовые параметры поиска и лимиты
-        int? limit = null,
-        // Характеристики контента
-        string? types = null,
-        int? year = null,
-        bool? camrip = null,
-        bool? lgbt = null,
-        string? animeKind = null,
-        string? animeStatus = null,
-        string? mydramalistTags = null,
-        string? ratingMpaa = null,
-        int? minimalAge = null,
-        int? duration = null,
-        string? countries = null,
-        string? genres = null,
-        string? animeGenres = null,
-        string? animeStudios = null,
-        // Переводы и озвучки
-        int? translationId = null,
-        string? translationType = null,
-        string? blockTranslations = null,
-        // Рейтинги
-        double? kinopoiskRating = null,
-        double? imdbRating = null,
-        double? shikimoriRating = null,
-        // Съемочная группа
-        string? actors = null,
-        string? directors = null,
-        string? producers = null,
-        string? writers = null,
-        string? composers = null,
-        string? editors = null,
-        string? designers = null,
-        string? operators = null,
-        // Наличие полей, блокировки и прочее
-        string? hasFieldAnd = null,
-        // Сортировка
-        string? sort = null,
-        string? order = null,
-        // ДОПОЛНИТЕЛЬНЫЕ ПАРАМЕТРЫ (Расширение ответа)
-        bool? withMaterialData = null,
-        bool? withSeasons = null,
-        bool? withEpisodes = null,
-        bool? withEpisodesData = null,
-        bool? withPageLinks = null 
-    );
+    public Task<SearchResponseDTO<T>> Search(SearchRequestParamDTO searchParam);
 }
 
-public class ApiKodik : IAgregatorApiService
-{
-    private readonly string _apiToken;
+public class ApiAgregatorShikimoriKodik: IAgregatorApiService<ShikimoriSearchResponseDTO>{
+    private string _kodikToken; 
+    private string _shikimoriURL;
+    private string _kodikSearchURL;
+    private string _kodikSearchListURL;
 
-    public ApiKodik(string apiToken)
-    {
-        _apiToken = apiToken;
+    public ApiAgregatorShikimoriKodik(string kodikToken, string shikimoriURL, string kodikSearchURL, string kodikSearchListURL) {
+        _kodikToken = kodikToken;
+        _shikimoriURL = shikimoriURL; 
+        _kodikSearchURL = kodikSearchURL;
+        _kodikSearchListURL = kodikSearchListURL;
     }
 
-    public async Task<KodikSearchResponse> Search(
-        string? title = null,
-        string? titleOrig = null,
-        string? id = null,
-        string? shikimoriId = null,
-        string? kinopoiskId = null,
-        string? imdbId = null,
-        string? mdlId = null,
-        string? worldartAnimationId = null,
-        string? worldartLink = null,
-        string? playerLink = null,
+    public async Task<SearchResponseDTO<ShikimoriSearchResponseDTO>> Search(SearchRequestParamDTO searchParam){
+        KodikSearchRequestParamDTO searchParamKodik = searchParam.searchKodik;
+        ShikimoriSearchRequestParamDTO searchParamShikimori = searchParam.searchShikimori;
+
+      string graphqlQuery = @"
+    query SearchAnimes(
+        $search: String, $limit: Int, $rating: RatingString, $page: Int, 
+        $order: OrderEnum, $kind: AnimeKindString, $status: AnimeStatusString, $season: SeasonString, 
+        $score: Int, $duration: DurationString, $genre: String, 
+        $studio: String, $censored: Boolean
+    ) {
+        animes(
+            search: $search, limit: $limit, rating: $rating, page: $page, 
+            order: $order, kind: $kind, status: $status, season: $season, 
+            score: $score, duration: $duration, genre: $genre, 
+            studio: $studio, censored: $censored
+        ) {
+            id malId name russian licenseNameRu english japanese synonyms kind rating score status episodes episodesAired duration
+            airedOn releasedOn url season
+            image { original preview x96 x48 }
+            fansubbers fandubbers licensors createdAt updatedAt nextEpisodeAt isCensored
+            genres { id name russian kind }
+            studios { id name imageUrl }
+            externalLinks { id kind url createdAt updatedAt }
+            personRoles {
+                roles rolesRussian
+                person { id name russian url image { original preview x96 x48 } }
+            }
+            characterRoles {
+                roles rolesRussian
+                character { 
+                    id name russian url altname japanese description descriptionHtml descriptionSource favoured threadId topicId updatedAt
+                    image { original preview x96 x48 } 
+                }
+            }
+            related {
+                id relationKind relationText
+                anime { id name russian english url kind image { original preview x96 x48 } }
+                manga { id name russian english url kind image { original preview x96 x48 } }
+            }
+            videos { id name url imageUrl playerUrl kind }
+            screenshots { originalUrl previewUrl }
+            scoresStats { score count }
+            statusesStats { status count }
+            description descriptionHtml descriptionSource
+        }
+    }";
+
+        var payload = new
+        {
+            query = graphqlQuery,
+            variables = searchParamShikimori
+        };
+
+        var finalResponse = new SearchResponseDTO<ShikimoriSearchResponseDTO>();
+
+        try
+        {
+            var responseShikimori = await _shikimoriURL
+            .WithHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+            .WithHeader("Accept", "application/json")
+            .PostJsonAsync(payload)
+            .ReceiveJson<GraphQLResponse<ShikimoriSearchResponseDTO>>();
+           if (responseShikimori.Errors != null && responseShikimori.Errors.Count > 0)
+            {
+                string errorMessage = responseShikimori.Errors[0].Message;
+                throw new Exception($"Ошибка GraphQL API Shikimori: {errorMessage}");
+            }
+            else
+            {
+                finalResponse.Response = responseShikimori.Data;
+                Console.WriteLine(responseShikimori);
+            }
+
+            for(int i =0; i< finalResponse.Response.Animes.Count; i++){
+                var responseKodik = await _kodikSearchURL
+                .SetQueryParam("token", _kodikToken)
+                .SetQueryParam("shikimori_id", finalResponse.Response.Animes[i].Id)
+                .GetAsync()
+                .ReceiveJson<KodikSearchResponseDTO>();
+                
+                if(responseKodik != null && responseKodik.Results != null && responseKodik.Results.Count > 0){
+                    finalResponse.Response.Animes[i].PleerLink = responseKodik.Results[0].Link;
+                }else{
+                    finalResponse.Response.Animes.RemoveAt(i);
+                }
+            }
+
+        }
+        catch (FlurlHttpException ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
         
-        bool? strict = null,
-        bool? fullMatch = null,
-        int? limit = null,
-        string? types = null,
-        int? year = null,
-        bool? lgbt = null,
-        string? anime_kind = null,
-        string? anime_status = null,
-        string? rating_mpaa = null,
-        int? minimal_age = null,
-        double? kinopoisk_rating = null,
-        double? imdb_rating = null,
-        double? shikimori_rating = null,
-        string? anime_studios = null,
-        string? genres = null,
-        string? anime_genres = null,
-        int? duration = null,
-        string? has_field_and = null,
-        string? prioritize_translations = null,
-        string? unprioritize_translations = null, 
-        string? block_translations = null,
-        int? season = null,
-        string? countries = null,
-
-        string? actors = null,
-        string? directors = null,
-        string? producers = null,
-        string? writers = null,
-        string? composers = null,
-        string? editors = null,
-        string? designers = null,
-        string? operators = null,
-        
-        int? translationId = null,
-        string? translationType = null,
-        bool? camrip = null,
-        string? mydramalist_tags = null,
-        
-        bool? withMaterialData = null,
-        bool? withSeasons = null,
-        bool? withEpisodes = null,
-        bool? withEpisodesData = null,
-        bool? withPageLinks = null)
-    {
-        var url = "https://kodik-api.com/search"
-            .SetQueryParam("token", _apiToken);
-
-        // Основные параметры поиска (якоря)
-        if (title != null) url = url.SetQueryParam("title", title);
-        if (titleOrig != null) url = url.SetQueryParam("title_orig", titleOrig);
-        if (id != null) url = url.SetQueryParam("id", id);
-        if (shikimoriId != null) url = url.SetQueryParam("shikimori_id", shikimoriId);
-        if (kinopoiskId != null) url = url.SetQueryParam("kinopoisk_id", kinopoiskId);
-        if (imdbId != null) url = url.SetQueryParam("imdb_id", imdbId);
-        if (mdlId != null) url = url.SetQueryParam("mdl_id", mdlId);
-        if (worldartAnimationId != null) url = url.SetQueryParam("worldart_animation_id", worldartAnimationId);
-        if (worldartLink != null) url = url.SetQueryParam("worldart_link", worldartLink);
-        if (playerLink != null) url = url.SetQueryParam("player_link", playerLink);
-
-        // Уточнение поиска
-        if (strict != null) url = url.SetQueryParam("strict", strict);
-        if (fullMatch != null) url = url.SetQueryParam("full_match", fullMatch);
-        if (limit != null) url = url.SetQueryParam("limit", limit);
-        if (types != null) url = url.SetQueryParam("types", types);
-        if (year != null) url = url.SetQueryParam("year", year);
-        if (lgbt != null) url = url.SetQueryParam("lgbt", lgbt);
-        if (anime_kind != null) url = url.SetQueryParam("anime_kind", anime_kind);
-        if (anime_status != null) url = url.SetQueryParam("anime_status", anime_status);
-        if (rating_mpaa != null) url = url.SetQueryParam("rating_mpaa", rating_mpaa);
-        if (minimal_age != null) url = url.SetQueryParam("minimal_age", minimal_age);
-        if (kinopoisk_rating != null) url = url.SetQueryParam("kinopoisk_rating", kinopoisk_rating);
-        if (imdb_rating != null) url = url.SetQueryParam("imdb_rating", imdb_rating);
-        if (shikimori_rating != null) url = url.SetQueryParam("shikimori_rating", shikimori_rating);
-        if (anime_studios != null) url = url.SetQueryParam("anime_studios", anime_studios);
-        if (genres != null) url = url.SetQueryParam("genres", genres);
-        if (anime_genres != null) url = url.SetQueryParam("anime_genres", anime_genres);
-        if (duration != null) url = url.SetQueryParam("duration", duration);
-        if (has_field_and != null) url = url.SetQueryParam("has_field_and", has_field_and);
-        if (prioritize_translations != null) url = url.SetQueryParam("prioritize_translations", prioritize_translations);
-        if (unprioritize_translations != null) url = url.SetQueryParam("unprioritize_translations", unprioritize_translations);
-        if (block_translations != null) url = url.SetQueryParam("block_translations", block_translations);
-        if (season != null) url = url.SetQueryParam("season", season);
-        if (countries != null) url = url.SetQueryParam("countries", countries);
-
-        // Съемочная группа
-        if (actors != null) url = url.SetQueryParam("actors", actors);
-        if (directors != null) url = url.SetQueryParam("directors", directors);
-        if (producers != null) url = url.SetQueryParam("producers", producers);
-        if (writers != null) url = url.SetQueryParam("writers", writers);
-        if (composers != null) url = url.SetQueryParam("composers", composers);
-        if (editors != null) url = url.SetQueryParam("editors", editors);
-        if (designers != null) url = url.SetQueryParam("designers", designers);
-        if (operators != null) url = url.SetQueryParam("operators", operators);
-
-        // Контентные уточнения
-        if (translationId != null) url = url.SetQueryParam("translation_id", translationId);
-        if (translationType != null) url = url.SetQueryParam("translation_type", translationType);
-        if (camrip != null) url = url.SetQueryParam("camrip", camrip);
-        if (mydramalist_tags != null) url = url.SetQueryParam("mydramalist_tags", mydramalist_tags);
-
-        // Дополнительные данные
-        if (withMaterialData != null) url = url.SetQueryParam("with_material_data", withMaterialData);
-        if (withSeasons != null) url = url.SetQueryParam("with_seasons", withSeasons);
-        if (withEpisodes != null) url = url.SetQueryParam("with_episodes", withEpisodes);
-        if (withEpisodesData != null) url = url.SetQueryParam("with_episodes_data", withEpisodesData);
-        if (withPageLinks != null) url = url.SetQueryParam("with_page_links", withPageLinks);
-
-        return await url
-            .GetAsync()                        
-            .ReceiveJson<KodikSearchResponse>();
+        return finalResponse;
     }
-
-    public async Task<KodikSearchResponse> SearchList(
-        int? limit = null,
-        string? types = null,
-        int? year = null,
-        bool? camrip = null,
-        bool? lgbt = null,
-        string? animeKind = null,
-        string? animeStatus = null,
-        string? mydramalistTags = null,
-        string? ratingMpaa = null,
-        int? minimalAge = null,
-        int? duration = null,
-        string? countries = null,
-        string? genres = null,
-        string? animeGenres = null,
-        string? animeStudios = null,
-        int? translationId = null,
-        string? translationType = null,
-        string? blockTranslations = null,
-        double? kinopoiskRating = null,
-        double? imdbRating = null,
-        double? shikimoriRating = null,
-        string? actors = null,
-        string? directors = null,
-        string? producers = null,
-        string? writers = null,
-        string? composers = null,
-        string? editors = null,
-        string? designers = null,
-        string? operators = null,
-        string? hasFieldAnd = null,
-        string? sort = null,
-        string? order = null,
-        bool? withMaterialData = null,
-        bool? withSeasons = null,
-        bool? withEpisodes = null,
-        bool? withEpisodesData = null,
-        bool? withPageLinks = null)
-    {
-        var url = "https://kodik-api.com/list"
-            .SetQueryParam("token", _apiToken);
-
-        // Базовые параметры поиска и лимиты
-        if (limit != null) url = url.SetQueryParam("limit", limit);
-
-        // Характеристики контента
-        if (types != null) url = url.SetQueryParam("types", types);
-        if (year != null) url = url.SetQueryParam("year", year);
-        if (camrip != null) url = url.SetQueryParam("camrip", camrip);
-        if (lgbt != null) url = url.SetQueryParam("lgbt", lgbt);
-        if (animeKind != null) url = url.SetQueryParam("anime_kind", animeKind);
-        if (animeStatus != null) url = url.SetQueryParam("anime_status", animeStatus);
-        if (mydramalistTags != null) url = url.SetQueryParam("mydramalist_tags", mydramalistTags);
-        if (ratingMpaa != null) url = url.SetQueryParam("rating_mpaa", ratingMpaa);
-        if (minimalAge != null) url = url.SetQueryParam("minimal_age", minimalAge);
-        if (duration != null) url = url.SetQueryParam("duration", duration);
-        if (countries != null) url = url.SetQueryParam("countries", countries);
-        if (genres != null) url = url.SetQueryParam("genres", genres);
-        if (animeGenres != null) url = url.SetQueryParam("anime_genres", animeGenres);
-        if (animeStudios != null) url = url.SetQueryParam("anime_studios", animeStudios);
-
-        // Переводы и озвучки
-        if (translationId != null) url = url.SetQueryParam("translation_id", translationId);
-        if (translationType != null) url = url.SetQueryParam("translation_type", translationType);
-        if (blockTranslations != null) url = url.SetQueryParam("block_translations", blockTranslations);
-
-        // Рейтинги
-        if (kinopoiskRating != null) url = url.SetQueryParam("kinopoisk_rating", kinopoiskRating);
-        if (imdbRating != null) url = url.SetQueryParam("imdb_rating", imdbRating);
-        if (shikimoriRating != null) url = url.SetQueryParam("shikimori_rating", shikimoriRating);
-
-        // Съемочная группа
-        if (actors != null) url = url.SetQueryParam("actors", actors);
-        if (directors != null) url = url.SetQueryParam("directors", directors);
-        if (producers != null) url = url.SetQueryParam("producers", producers);
-        if (writers != null) url = url.SetQueryParam("writers", writers);
-        if (composers != null) url = url.SetQueryParam("composers", composers);
-        if (editors != null) url = url.SetQueryParam("editors", editors);
-        if (designers != null) url = url.SetQueryParam("designers", designers);
-        if (operators != null) url = url.SetQueryParam("operators", operators);
-
-        // Наличие полей, блокировки и прочее
-        if (hasFieldAnd != null) url = url.SetQueryParam("has_field_and", hasFieldAnd);
-
-        // Сортировка
-        if (sort != null) url = url.SetQueryParam("sort", sort);
-        if (order != null) url = url.SetQueryParam("order", order);
-
-        // Дополнительные параметры
-        if (withMaterialData != null) url = url.SetQueryParam("with_material_data", withMaterialData);
-        if (withSeasons != null) url = url.SetQueryParam("with_seasons", withSeasons);
-        if (withEpisodes != null) url = url.SetQueryParam("with_episodes", withEpisodes);
-        if (withEpisodesData != null) url = url.SetQueryParam("with_episodes_data", withEpisodesData);
-        if (withPageLinks != null) url = url.SetQueryParam("with_page_links", withPageLinks);
-
-        return await url
-            .GetAsync()                        
-            .ReceiveJson<KodikSearchResponse>();
-    }
-};
+}

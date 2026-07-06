@@ -1,7 +1,7 @@
 using System.Text.Json.Serialization;
 using System.Collections.Generic;
 
-public class KodikSearchResponse
+public class KodikSearchResponseDTO
 {
     
     [JsonPropertyName("time")]

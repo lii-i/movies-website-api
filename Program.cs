@@ -7,9 +7,9 @@ public class Program {
 
         builder.Services.AddDbContext<CinemaDbContext>(options => options.UseNpgsql(Config.GetConnectionString("PostgreSql"))); 
         //builder.Services.AddScoped<IRepository,Repository>();
-        builder.Services.AddSingleton<IAgregatorApiService, ApiKodik>(delProvider => {
+        builder.Services.AddSingleton<IAgregatorApiService<ShikimoriSearchResponseDTO>, ApiAgregatorShikimoriKodik>(delProvider => {
             // потом еще логгер надо зарегать
-            return new ApiKodik(Config["Tokens:Kodik"]);
+            return new ApiAgregatorShikimoriKodik(Config["Tokens:Kodik"], Config["URLs:Shikimori"], Config["URLs:Kodik:Search"], Config["URLs:Kodik:List"]);
         });
         var app = builder.Build();
 

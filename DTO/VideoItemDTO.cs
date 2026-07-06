@@ -13,6 +13,10 @@ public class VideoItemDTO {
     public string Link { get; set; } = string.Empty;
     public int? LastSeason { get; set; }
     public int? LastEpisode { get; set; }
+    public List<string> Screenshots { get; set; } = new();
+    public List<string> AllGenres { get; set; } = new();
+    public string? AnimeKind { get; set; }
+    public List<string> AnimeStudios { get; set; } = new();
     public int? EpisodesCount { get; set; }
     public string? AllStatus { get; set; }
     public string? Description { get; set; }
@@ -34,5 +38,13 @@ public class VideoItemDTO {
     public int? MinimalAge { get; set; }
     public int? EpisodesTotal { get; set; }
     public int? EpisodesAired { get; set; }
+    public List<string> Actors { get; set; } = new();
+    public List<string> Directors { get; set; } = new();
+    public List<string> Producers { get; set; } = new();
+    public List<string> Writers { get; set; } = new();
+    public List<string> Composers { get; set; } = new();
+    public List<string> Editors { get; set; } = new();
+    public List<string> Designers { get; set; } = new();
+    public List<string> Operators { get; set; } = new();
 }
 
