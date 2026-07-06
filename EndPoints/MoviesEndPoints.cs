@@ -5,6 +5,7 @@ public static class MoviesEndPoints{
         app.MapGet("/search", async (
         [FromServices] IAgregatorApiService<ShikimoriSearchResponseDTO> ApiAgregator,
         [FromQuery] string? title,
+        [FromQuery] int? limit,
         [FromQuery] double? ratingDown,
         [FromQuery] double? ratingHight,
         [FromQuery] string[]? genres,
@@ -12,10 +13,12 @@ public static class MoviesEndPoints{
         ) =>{
             SearchRequestParamDTO searchParam = new SearchRequestParamDTO();
             searchParam.searchShikimori = new ShikimoriSearchRequestParamDTO{
-                Title = title
+                Title = title,
+                Limit = limit
             };
 
             var response = await ApiAgregator.Search(searchParam);
+            Console.WriteLine(response);
 
             return TypedResults.Ok(response.Response);
             

@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
+using System.Text.Json;
 
-public class ShikimoriSearchResponseDTO {
+public class ShikimoriSearchResponseDTO 
+{
     [JsonPropertyName("animes")]
     public List<GraphQLAnimeDTO> Animes { get; set; } = new();
 }
@@ -10,7 +12,7 @@ public class ShikimoriSearchResponseDTO {
 public class GraphQLAnimeDTO
 {
     [JsonPropertyName("id")]
-    public int Id { get; set; } // Исправлено на int и убрана строка
+    public string? Id { get; set; } 
 
     [JsonPropertyName("malId")]
     public string? MalId { get; set; }
@@ -40,7 +42,7 @@ public class GraphQLAnimeDTO
     public string? Rating { get; set; }
 
     [JsonPropertyName("score")]
-    public string? Score { get; set; } // Исправлено на string
+    public JsonElement? Score { get; set; } 
 
     [JsonPropertyName("status")]
     public string? Status { get; set; }
@@ -55,10 +57,10 @@ public class GraphQLAnimeDTO
     public int Duration { get; set; }
 
     [JsonPropertyName("airedOn")]
-    public string? AiredOn { get; set; } // Исправлено на string
+    public DateInfoDTO? AiredOn { get; set; } 
 
     [JsonPropertyName("releasedOn")]
-    public string? ReleasedOn { get; set; } // Исправлено на string
+    public DateInfoDTO? ReleasedOn { get; set; } 
 
     [JsonPropertyName("url")]
     public string? Url { get; set; }
@@ -66,8 +68,8 @@ public class GraphQLAnimeDTO
     [JsonPropertyName("season")]
     public string? Season { get; set; }
 
-    [JsonPropertyName("image")]
-    public AnimeImageDTO? Image { get; set; } // Заменено на AnimeImageDTO
+    [JsonPropertyName("poster")]
+    public AnimePosterDTO? Poster { get; set; } 
 
     [JsonPropertyName("fansubbers")]
     public List<string> Fansubbers { get; set; } = new();
@@ -129,30 +131,52 @@ public class GraphQLAnimeDTO
     [JsonPropertyName("descriptionSource")]
     public string? DescriptionSource { get; set; }
 
-    public string? PleerLink {get; set;}
+    public string? PleerLink { get; set; }
 }
 
-// ВЛОЖЕННЫЕ КЛАССЫ (ПОДОБЪЕКТЫ)
-
-public class AnimeImageDTO
+public class DateInfoDTO
 {
-    [JsonPropertyName("original")]
-    public string? Original { get; set; }
+    [JsonPropertyName("year")]
+    public int? Year { get; set; }
 
-    [JsonPropertyName("preview")]
-    public string? Preview { get; set; }
+    [JsonPropertyName("month")]
+    public int? Month { get; set; }
 
-    [JsonPropertyName("x96")]
-    public string? X96 { get; set; }
+    [JsonPropertyName("day")]
+    public int? Day { get; set; }
 
-    [JsonPropertyName("x48")]
-    public string? X48 { get; set; }
+    [JsonPropertyName("date")]
+    public string? Date { get; set; }
+}
+
+public class AnimePosterDTO
+{
+    [JsonPropertyName("id")]
+    public string? Id { get; set; }
+
+    [JsonPropertyName("originalUrl")]
+    public string? OriginalUrl { get; set; }
+
+    [JsonPropertyName("mainUrl")]
+    public string? MainUrl { get; set; }
+}
+
+public class PersonPosterDTO
+{
+    [JsonPropertyName("id")]
+    public string? Id { get; set; }
+
+    [JsonPropertyName("mainUrl")]
+    public string? MainUrl { get; set; }
+
+    [JsonPropertyName("mainAltUrl")]
+    public string? MainAltUrl { get; set; }
 }
 
 public class GraphGenreDTO
 {
     [JsonPropertyName("id")]
-    public string Id { get; set; } = string.Empty;
+    public string? Id { get; set; } = string.Empty;
 
     [JsonPropertyName("name")]
     public string? Name { get; set; }
@@ -167,7 +191,7 @@ public class GraphGenreDTO
 public class GraphStudioDTO
 {
     [JsonPropertyName("id")]
-    public string Id { get; set; } = string.Empty;
+    public string? Id { get; set; } = string.Empty;
 
     [JsonPropertyName("name")]
     public string? Name { get; set; }
@@ -179,7 +203,7 @@ public class GraphStudioDTO
 public class ExternalLinkDTO
 {
     [JsonPropertyName("id")]
-    public string Id { get; set; } = string.Empty;
+    public string? Id { get; set; } = string.Empty;
 
     [JsonPropertyName("kind")]
     public string? Kind { get; set; }
@@ -196,11 +220,11 @@ public class ExternalLinkDTO
 
 public class PersonRoleDTO
 {
-    [JsonPropertyName("roles")]
-    public List<string> Roles { get; set; } = new();
+    [JsonPropertyName("rolesEn")]
+    public List<string> RolesEn { get; set; } = new();
 
-    [JsonPropertyName("rolesRussian")]
-    public List<string> RolesRussian { get; set; } = new();
+    [JsonPropertyName("rolesRu")]
+    public List<string> RolesRu { get; set; } = new();
 
     [JsonPropertyName("person")]
     public PersonDTO? Person { get; set; }
@@ -209,7 +233,7 @@ public class PersonRoleDTO
 public class PersonDTO
 {
     [JsonPropertyName("id")]
-    public int Id { get; set; } // int!
+    public string? Id { get; set; }
 
     [JsonPropertyName("name")]
     public string? Name { get; set; }
@@ -220,18 +244,17 @@ public class PersonDTO
     [JsonPropertyName("url")]
     public string? Url { get; set; }
 
-    [JsonPropertyName("image")]
-    public AnimeImageDTO? Image { get; set; } // Используем наш AnimeImageDTO
+    [JsonPropertyName("poster")]
+    public PersonPosterDTO? Poster { get; set; }
 }
 
 public class CharacterRoleDTO
 {
-    // Поля id здесь больше нет!
-    [JsonPropertyName("roles")]
-    public List<string> Roles { get; set; } = new();
+    [JsonPropertyName("rolesEn")]
+    public List<string> RolesEn { get; set; } = new();
 
-    [JsonPropertyName("rolesRussian")]
-    public List<string> RolesRussian { get; set; } = new();
+    [JsonPropertyName("rolesRu")]
+    public List<string> RolesRu { get; set; } = new();
 
     [JsonPropertyName("character")]
     public CharacterDTO? Character { get; set; }
@@ -240,7 +263,7 @@ public class CharacterRoleDTO
 public class CharacterDTO
 {
     [JsonPropertyName("id")]
-    public int Id { get; set; } // Исправлено на int!
+    public string? Id { get; set; }
 
     [JsonPropertyName("name")]
     public string? Name { get; set; }
@@ -250,9 +273,6 @@ public class CharacterDTO
 
     [JsonPropertyName("url")]
     public string? Url { get; set; }
-
-    [JsonPropertyName("altname")]
-    public string? Altname { get; set; }
 
     [JsonPropertyName("japanese")]
     public string? Japanese { get; set; }
@@ -266,40 +286,19 @@ public class CharacterDTO
     [JsonPropertyName("descriptionSource")]
     public string? DescriptionSource { get; set; }
 
-    [JsonPropertyName("favoured")]
-    public bool? Favoured { get; set; }
-
-    [JsonPropertyName("threadId")]
-    public int? ThreadId { get; set; }
-
-    [JsonPropertyName("topicId")]
-    public int? TopicId { get; set; }
-
     [JsonPropertyName("updatedAt")]
     public string? UpdatedAt { get; set; }
 
-    [JsonPropertyName("image")]
-    public AnimeImageDTO? Image { get; set; } 
+    [JsonPropertyName("poster")]
+    public PersonPosterDTO? Poster { get; set; } 
     
     public List<SeyuDTO> Seyu { get; set; } = new();
-}
-
-public class PersonPosterDTO
-{
-    [JsonPropertyName("id")]
-    public string Id { get; set; } = string.Empty;
-
-    [JsonPropertyName("mainUrl")]
-    public string? MainUrl { get; set; }
-
-    [JsonPropertyName("mainAltUrl")]
-    public string? MainAltUrl { get; set; }
 }
 
 public class SeyuDTO
 {
     [JsonPropertyName("id")]
-    public int Id { get; set; }
+    public string? Id { get; set; }
 
     [JsonPropertyName("name")]
     public string? Name { get; set; }
@@ -310,14 +309,14 @@ public class SeyuDTO
     [JsonPropertyName("url")]
     public string? Url { get; set; }
 
-    [JsonPropertyName("image")]
-    public AnimeImageDTO? Image { get; set; }
+    [JsonPropertyName("poster")]
+    public PersonPosterDTO? Poster { get; set; }
 }
 
 public class RelatedDTO
 {
     [JsonPropertyName("id")]
-    public string Id { get; set; } = string.Empty;
+    public string? Id { get; set; } = string.Empty;
 
     [JsonPropertyName("anime")]
     public RelatedMediaDTO? Anime { get; set; }
@@ -335,7 +334,7 @@ public class RelatedDTO
 public class RelatedMediaDTO
 {
     [JsonPropertyName("id")]
-    public int Id { get; set; } // Опять же, ID — это int
+    public string? Id { get; set; }
 
     [JsonPropertyName("name")]
     public string? Name { get; set; }
@@ -352,14 +351,14 @@ public class RelatedMediaDTO
     [JsonPropertyName("kind")]
     public string? Kind { get; set; }
 
-    [JsonPropertyName("image")]
-    public AnimeImageDTO? Image { get; set; } // И здесь тоже image!
+    [JsonPropertyName("poster")]
+    public AnimePosterDTO? Poster { get; set; } 
 }
 
 public class GraphVideoDTO
 {
     [JsonPropertyName("id")]
-    public string Id { get; set; } = string.Empty;
+    public string? Id { get; set; } = string.Empty;
 
     [JsonPropertyName("name")]
     public string? Name { get; set; }
@@ -379,11 +378,17 @@ public class GraphVideoDTO
 
 public class GraphScreenshotDTO
 {
+    [JsonPropertyName("id")]
+    public string? Id { get; set; }
+
     [JsonPropertyName("originalUrl")]
     public string? OriginalUrl { get; set; }
 
-    [JsonPropertyName("previewUrl")]
-    public string? PreviewUrl { get; set; }
+    [JsonPropertyName("x166Url")]
+    public string? X166Url { get; set; }
+
+    [JsonPropertyName("x332Url")]
+    public string? X332Url { get; set; }
 }
 
 public class GraphScoreStatDTO

@@ -39,30 +39,19 @@ public class ApiAgregatorShikimoriKodik: IAgregatorApiService<ShikimoriSearchRes
             studio: $studio, censored: $censored
         ) {
             id malId name russian licenseNameRu english japanese synonyms kind rating score status episodes episodesAired duration
-            airedOn releasedOn url season
-            image { original preview x96 x48 }
+            airedOn { year month day date } 
+            releasedOn { year month day date }
+            url season
+            
+            poster { id originalUrl mainUrl }
+            
             fansubbers fandubbers licensors createdAt updatedAt nextEpisodeAt isCensored
             genres { id name russian kind }
             studios { id name imageUrl }
             externalLinks { id kind url createdAt updatedAt }
-            personRoles {
-                roles rolesRussian
-                person { id name russian url image { original preview x96 x48 } }
-            }
-            characterRoles {
-                roles rolesRussian
-                character { 
-                    id name russian url altname japanese description descriptionHtml descriptionSource favoured threadId topicId updatedAt
-                    image { original preview x96 x48 } 
-                }
-            }
-            related {
-                id relationKind relationText
-                anime { id name russian english url kind image { original preview x96 x48 } }
-                manga { id name russian english url kind image { original preview x96 x48 } }
-            }
-            videos { id name url imageUrl playerUrl kind }
-            screenshots { originalUrl previewUrl }
+            
+            screenshots { id originalUrl x166Url x332Url }
+            
             scoresStats { score count }
             statusesStats { status count }
             description descriptionHtml descriptionSource
@@ -84,6 +73,8 @@ public class ApiAgregatorShikimoriKodik: IAgregatorApiService<ShikimoriSearchRes
             .WithHeader("Accept", "application/json")
             .PostJsonAsync(payload)
             .ReceiveJson<GraphQLResponse<ShikimoriSearchResponseDTO>>();
+
+            
            if (responseShikimori.Errors != null && responseShikimori.Errors.Count > 0)
             {
                 string errorMessage = responseShikimori.Errors[0].Message;
@@ -106,6 +97,7 @@ public class ApiAgregatorShikimoriKodik: IAgregatorApiService<ShikimoriSearchRes
                     finalResponse.Response.Animes[i].PleerLink = responseKodik.Results[0].Link;
                 }else{
                     finalResponse.Response.Animes.RemoveAt(i);
+                    i--;
                 }
             }
 
