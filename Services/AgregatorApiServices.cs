@@ -3,12 +3,12 @@ using System.Threading.Tasks;
 using Flurl;
 using Flurl.Http;
 
-public interface IAgregatorApiService<T>
+public interface IAgregatorApiService<Res,Req>
 {
-    public Task<SearchResponseDTO<T>> Search(SearchRequestParamDTO searchParam);
+    public Task<SearchResponseDTO<Res>> Search(SearchRequestParamDTO<Req> searchParam);
 }
 
-public class ApiAgregatorShikimoriKodik: IAgregatorApiService<ShikimoriSearchResponseDTO>{
+public class ApiAgregatorShikimoriKodik: IAgregatorApiService<ShikimoriSearchResponseDTO, ShikimoriSearchRequestParamDTO>{
     private string _kodikToken; 
     private string _shikimoriURL;
     private string _kodikSearchURL;
@@ -21,9 +21,9 @@ public class ApiAgregatorShikimoriKodik: IAgregatorApiService<ShikimoriSearchRes
         _kodikSearchListURL = kodikSearchListURL;
     }
 
-    public async Task<SearchResponseDTO<ShikimoriSearchResponseDTO>> Search(SearchRequestParamDTO searchParam){
-        KodikSearchRequestParamDTO searchParamKodik = searchParam.searchKodik;
-        ShikimoriSearchRequestParamDTO searchParamShikimori = searchParam.searchShikimori;
+    public async Task<SearchResponseDTO<ShikimoriSearchResponseDTO>> Search(SearchRequestParamDTO<ShikimoriSearchRequestParamDTO> searchParam){
+        
+        ShikimoriSearchRequestParamDTO searchParamShikimori = searchParam.SearchRequestParam;
 
       string graphqlQuery = @"
     query SearchAnimes(

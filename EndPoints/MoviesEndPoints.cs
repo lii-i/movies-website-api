@@ -3,18 +3,22 @@ using Microsoft.AspNetCore.Mvc;
 public static class MoviesEndPoints{
     public static WebApplication AddMoviesEndPoints(this WebApplication app){
         app.MapGet("/search", async (
-        [FromServices] IAgregatorApiService<ShikimoriSearchResponseDTO> ApiAgregator,
-        [FromQuery] string? title,
-        [FromQuery] int? limit,
-        [FromQuery] double? ratingDown,
-        [FromQuery] double? ratingHight,
-        [FromQuery] string[]? genres,
-        [FromQuery] string? mpaaRating
+        [FromServices] IAgregatorApiService<ShikimoriSearchResponseDTO, ShikimoriSearchRequestParamDTO> ApiAgregator,
+        [FromQuery(Name="title")] string? title,
+        [FromQuery(Name="limit")] int? limit,
+        [FromQuery(Name="minRating")] int? minRating,
+        [FromQuery(Name="duration")] string? duration, 
+        [FromQuery(Name="genres")] string? genres,
+        [FromQuery(Name="mpaaRating")] string? mpaaRating
         ) =>{
-            SearchRequestParamDTO searchParam = new SearchRequestParamDTO();
-            searchParam.searchShikimori = new ShikimoriSearchRequestParamDTO{
+            SearchRequestParamDTO<ShikimoriSearchRequestParamDTO> searchParam = new SearchRequestParamDTO<ShikimoriSearchRequestParamDTO>();
+            searchParam.SearchRequestParam = new ShikimoriSearchRequestParamDTO{
                 Title = title,
-                Limit = limit
+                Limit = limit,
+                Score = minRating,
+                Duration = duration,
+                Genre = genres,
+                Rating = mpaaRating
             };
 
             var response = await ApiAgregator.Search(searchParam);

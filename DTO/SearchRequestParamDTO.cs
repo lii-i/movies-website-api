@@ -1,7 +1,6 @@
 using System.Text.Json.Serialization;
 
-public class SearchRequestParamDTO
+public class SearchRequestParamDTO<T>
 {
-    public ShikimoriSearchRequestParamDTO searchShikimori {get; set;}
-    public KodikSearchRequestParamDTO searchKodik {get; set;}
+    public T SearchRequestParam {get; set;}
 }
