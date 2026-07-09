@@ -52,6 +52,22 @@ public class ApiAgregatorShikimoriKodik: IAgregatorApiService<ShikimoriSearchRes
             
             screenshots { id originalUrl x166Url x332Url }
             
+            videos { id url name kind playerUrl imageUrl }
+            
+            personRoles {
+                id rolesRu rolesEn
+                person { id name poster { id mainUrl mainAltUrl } }
+            }
+            characterRoles {
+                id rolesRu rolesEn
+                character { id name russian poster { id mainUrl mainAltUrl } }
+            }
+            related {
+                id relationKind relationText
+                anime { id name russian english url }
+                manga { id name russian english url }
+            }
+            
             scoresStats { score count }
             statusesStats { status count }
             description descriptionHtml descriptionSource
