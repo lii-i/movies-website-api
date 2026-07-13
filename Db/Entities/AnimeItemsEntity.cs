@@ -1,5 +1,4 @@
 public class AnimeItemsEntity {
-    public int Id { get; set; }
     public int ShikimoriId { get; set; }
     public int? MalId { get; set; }
     public string Title { get; set; } = string.Empty;
@@ -12,8 +11,8 @@ public class AnimeItemsEntity {
     public string? Rating { get; set; }          
     public double? Score { get; set; }
     public string? Status { get; set; }
-    public int Episodes { get; set; }
-    public int EpisodesAired { get; set; }
+    public int? Episodes { get; set; }
+    public int? EpisodesAired { get; set; }
     public int? Duration { get; set; }
     public DateOnly? AiredOn { get; set; }
     public DateOnly? ReleasedOn { get; set; }

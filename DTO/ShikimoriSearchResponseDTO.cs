@@ -41,20 +41,23 @@ public class GraphQLAnimeDTO
     [JsonPropertyName("rating")]
     public string? Rating { get; set; }
 
+    [JsonPropertyName("page")]
+    public int? Page { get; set; }
+
     [JsonPropertyName("score")]
-    public JsonElement? Score { get; set; } 
+    public double? Score { get; set; } 
 
     [JsonPropertyName("status")]
     public string? Status { get; set; }
 
     [JsonPropertyName("episodes")]
-    public int Episodes { get; set; }
+    public int? Episodes { get; set; }
 
     [JsonPropertyName("episodesAired")]
-    public int EpisodesAired { get; set; }
+    public int? EpisodesAired { get; set; }
 
     [JsonPropertyName("duration")]
-    public int Duration { get; set; }
+    public int? Duration { get; set; }
 
     [JsonPropertyName("airedOn")]
     public DateInfoDTO? AiredOn { get; set; } 
