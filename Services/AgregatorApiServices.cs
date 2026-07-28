@@ -3,27 +3,132 @@ using System.Threading.Tasks;
 using Flurl;
 using Flurl.Http;
 
-public interface IAgregatorApiService<Res,Req>
-{
-    public Task<SearchResponseDTO<Res>> Search(SearchRequestParamDTO<Req> searchParam);
+public interface ISearchService{
+    public Task<SearchResponseDTO> SearchAPIAsync(SearchRequestParamDTO searchParam);
 }
 
-public class ApiAgregatorShikimoriKodik: IAgregatorApiService<ShikimoriSearchResponseDTO, ShikimoriSearchRequestParamDTO>{
+public class ApiAgregatorShikimoriKodikSearch: ISearchService{
     private string _kodikToken; 
     private string _shikimoriURL;
     private string _kodikSearchURL;
     private string _kodikSearchListURL;
 
-    public ApiAgregatorShikimoriKodik(string kodikToken, string shikimoriURL, string kodikSearchURL, string kodikSearchListURL) {
+    public ApiAgregatorShikimoriKodikSearch(string kodikToken, string shikimoriURL, string kodikSearchURL, string kodikSearchListURL) {
         _kodikToken = kodikToken;
         _shikimoriURL = shikimoriURL; 
         _kodikSearchURL = kodikSearchURL;
         _kodikSearchListURL = kodikSearchListURL;
     }
 
-    public async Task<SearchResponseDTO<ShikimoriSearchResponseDTO>> Search(SearchRequestParamDTO<ShikimoriSearchRequestParamDTO> searchParam){
-        
-        ShikimoriSearchRequestParamDTO searchParamShikimori = searchParam.SearchRequestParam;
+    public async Task<SearchResponseDTO> SearchAPIAsync(SearchRequestParamDTO searchParam){
+        ShikimoriSearchRequestParamDTO searchParamShikimori = new ShikimoriSearchRequestParamDTO {
+            Title = searchParam.Title,
+            Limit = searchParam.Limit,
+            Rating = searchParam.Rating,
+            Page = searchParam.Page,
+            Order = searchParam.Order,
+            Kind = searchParam.Kind,
+            Status = searchParam.Status,
+            Season = searchParam.Season,
+            Score = searchParam.Score,
+            Duration = searchParam.Duration,
+            Genre = searchParam.Genre,
+            GenreV2 = searchParam.GenreV2,
+            Studio = searchParam.Studio,
+            Franchize = searchParam.Franchize,
+            Censored = searchParam.Censored,
+            Ids = searchParam.Ids,
+            ExcludeIds = searchParam.ExcludeIds
+        };
+
+        ShikimoriSearchResponseDTO shikimoriResponse = await SearchAsync(searchParamShikimori);
+
+        return MapToResponseDTO(shikimoriResponse);
+    }
+
+    private SearchResponseDTO MapToResponseDTO(ShikimoriSearchResponseDTO shikimori)
+    {
+        return new SearchResponseDTO
+        {
+           Items =  shikimori.Animes.Select(a => new AnimeResponseDTO
+            {
+                Id          = Convert.ToInt32(a.Id),
+                MalId       = a.MalId != null ? Convert.ToInt32(a.MalId) : null,
+
+                Title         = a.Russian ?? a.Name,         
+                OriginalTitle = a.English ?? a.Name,       
+                TitleEn       = a.English,
+                TitleJap      = a.Japanese,
+                Synonyms      = a.Synonyms,
+
+                Poster         = a.Poster?.MainUrl,
+                PosterOriginal = a.Poster?.OriginalUrl,
+                Backdrop = a.Screenshots.Count > 0
+                    ? a.Screenshots[0].OriginalUrl
+                    : a.Poster?.OriginalUrl,
+
+                Rating    = a.Score,
+                AgeRating = a.Rating, 
+                Kind   = a.Kind,
+                Status = a.Status,
+                Season = a.Season,
+
+                Year       = a.AiredOn?.Year,
+                AiredOn    = DateOnly.TryParse(a.AiredOn?.Date, out var aired)    ? aired    : null,
+                ReleasedOn = DateOnly.TryParse(a.ReleasedOn?.Date, out var released) ? released : null,
+
+                Episodes      = a.Episodes,
+                EpisodesAired = a.EpisodesAired,
+                Duration      = a.Duration,
+
+                Genres = a.Genres
+                    .Select(g => g.Russian ?? g.Name ?? string.Empty)
+                    .Where(g => !string.IsNullOrEmpty(g))
+                    .ToList(),
+
+                Studios = a.Studios
+                    .Select(s => s.Name ?? string.Empty)
+                    .Where(s => !string.IsNullOrEmpty(s))
+                    .ToList(),
+
+                Director = a.PersonRoles
+                    .FirstOrDefault(p => p.RolesEn.Contains("Director"))
+                    ?.Person?.Name,
+
+
+                Cast = a.CharacterRoles
+                    .Take(10)
+                    .Select(c => c.Character?.Russian ?? c.Character?.Name ?? string.Empty)
+                    .Where(n => !string.IsNullOrEmpty(n))
+                    .ToList(),
+
+                Description     = a.Description,
+                DescriptionHtml = a.DescriptionHtml,
+
+                EmbedUrl = a.PleerLink,
+
+                Screenshots = a.Screenshots
+                    .Select(s => s.OriginalUrl ?? string.Empty)
+                    .Where(s => !string.IsNullOrEmpty(s))
+                    .ToList(),
+
+                Related = a.Related
+                    .Where(r => r.Anime != null)
+                    .Select(r => new RelatedAnimeDTO
+                    {
+                        Id           = Convert.ToInt32(r.Anime!.Id ?? "0"),
+                        Title        = r.Anime.Russian ?? r.Anime.Name ?? string.Empty,
+                        RelationKind = r.RelationKind,
+                        RelationText = r.RelationText
+                    })
+                    .ToList()
+
+            }).ToList()
+        };
+    }
+
+
+    public async Task<ShikimoriSearchResponseDTO> SearchAsync(ShikimoriSearchRequestParamDTO searchParamShikimori){
 
       string graphqlQuery = @"
     query SearchAnimes(
@@ -80,39 +185,39 @@ public class ApiAgregatorShikimoriKodik: IAgregatorApiService<ShikimoriSearchRes
             variables = searchParamShikimori
         };
 
-        var finalResponse = new SearchResponseDTO<ShikimoriSearchResponseDTO>();
+        ShikimoriSearchResponseDTO responseShikimori = new ShikimoriSearchResponseDTO();
 
         try
         {
-            var responseShikimori = await _shikimoriURL
+            var responseFlurl = await _shikimoriURL
             .WithHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
             .WithHeader("Accept", "application/json")
             .PostJsonAsync(payload)
             .ReceiveJson<GraphQLResponse<ShikimoriSearchResponseDTO>>();
 
             
-           if (responseShikimori.Errors != null && responseShikimori.Errors.Count > 0)
+           if (responseFlurl.Errors != null && responseFlurl.Errors.Count > 0)
             {
-                string errorMessage = responseShikimori.Errors[0].Message;
+                string errorMessage = responseFlurl.Errors[0].Message;
                 throw new Exception($"Ошибка GraphQL API Shikimori: {errorMessage}");
             }
             else
             {
-                finalResponse.Response = responseShikimori.Data;
+                responseShikimori = responseFlurl.Data;
                 Console.WriteLine(responseShikimori);
             }
 
-            for(int i =0; i< finalResponse.Response.Animes.Count; i++){
+            for(int i =0; i< responseShikimori.Animes.Count; i++){
                 var responseKodik = await _kodikSearchURL
                 .SetQueryParam("token", _kodikToken)
-                .SetQueryParam("shikimori_id", finalResponse.Response.Animes[i].Id)
+                .SetQueryParam("shikimori_id", responseShikimori.Animes[i].Id)
                 .GetAsync()
                 .ReceiveJson<KodikSearchResponseDTO>();
                 
                 if(responseKodik != null && responseKodik.Results != null && responseKodik.Results.Count > 0){
-                    finalResponse.Response.Animes[i].PleerLink = responseKodik.Results[0].Link;
+                    responseShikimori.Animes[i].PleerLink = responseKodik.Results[0].Link;
                 }else{
-                    finalResponse.Response.Animes.RemoveAt(i);
+                    responseShikimori.Animes.RemoveAt(i);
                     i--;
                 }
             }
@@ -123,6 +228,6 @@ public class ApiAgregatorShikimoriKodik: IAgregatorApiService<ShikimoriSearchRes
             Console.WriteLine(ex.Message);
         }
         
-        return finalResponse;
+        return responseShikimori;
     }
 }
