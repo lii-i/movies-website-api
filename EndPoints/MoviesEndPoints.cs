@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
        
         app.MapGet("/search", async (
         [FromServices] ISearchService ApiAgregator,
+        [FromServices] IRepository rep,
         [FromQuery(Name="title")] string? title,
         [FromQuery(Name="limit")] int? limit,
         [FromQuery(Name="minRating")] int? minRating,
@@ -22,7 +23,11 @@ using Microsoft.AspNetCore.Mvc;
             };
 
             SearchResponseDTO responseAPI = await ApiAgregator.SearchAPIAsync(searchParam);
-            
+
+            foreach(var item in responseAPI.Items){
+                await rep.AddOrUpdateAnimeAsync(item);
+            }
+
             return TypedResults.Ok(responseAPI);
 
 

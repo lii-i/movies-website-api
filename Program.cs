@@ -11,7 +11,9 @@ public class Program {
             // потом еще логгер надо зарегать
             return new ApiAgregatorShikimoriKodikSearch(Config["Tokens:Kodik"], Config["URLs:Shikimori"], Config["URLs:Kodik:Search"], Config["URLs:Kodik:List"]);
         });
+        builder.Services.AddScoped<IRepository, Repository>();
         var app = builder.Build();
+
 
         if (app.Environment.IsDevelopment())
         {
