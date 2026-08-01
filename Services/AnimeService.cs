@@ -18,7 +18,6 @@ public class AnimeService
             }
         }
     }
-
     public async Task<List<AnimeEntity>> GetAnimeByFiltersAsync(SearchRequestParamDTO requestParam)
     {
         using(var scope = _services.CreateScope()){
