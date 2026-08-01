@@ -35,6 +35,7 @@ public class AnimeEntity
 
     public string? Description { get; set; }
     public string? DescriptionHtml { get; set; }
+    public bool? Censored {get; set;}
 
     public string? EmbedUrl { get; set; }
 

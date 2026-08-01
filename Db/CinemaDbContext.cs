@@ -35,6 +35,7 @@ public class CinemaDbContext : DbContext
                     v => JsonSerializer.Deserialize<List<RelatedAnimeDTO>>(v, (JsonSerializerOptions?)null) ?? new()
                 )
                 .Metadata.SetValueComparer(relatedComparer);
+            entity.Property(a => a.Censored).HasColumnType("boolean");
         });
 
         modelBuilder.Entity<WatchListUsersEntity>()
