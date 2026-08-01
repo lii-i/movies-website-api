@@ -7,8 +7,10 @@
 --------
 
 GET /api/movies
-  — Список фильмов с фильтрацией
-  Query: genre, ageRating, yearFrom, yearTo, minRating, sortBy, page, pageSize
+  — Список фильмов с фильтрацией и курсорной пагинацией
+  Query: genre, ageRating, yearFrom, yearTo, minRating, sortBy, lastId, pageSize
+         lastId   — id последнего фильма с предыдущей страницы (для cursor)
+         pageSize — кол-во записей за раз (по умолчанию 20)
   Ответ:
   [
     {
@@ -35,6 +37,7 @@ GET /api/movies
 
 GET /api/movies/featured
   — Фильмы для hero-баннера (featured = true)
+  Query: sortBy, lastId, pageSize
   Ответ: (тот же массив что и /api/movies, только featured фильмы)
   [
     {
@@ -56,6 +59,7 @@ GET /api/movies/featured
 
 GET /api/movies/popular
   — Популярные фильмы (isPopular = true)
+  Query: lastId, pageSize
   Ответ: (тот же массив что и /api/movies)
   [ { "id": 1, "title": "...", ... } ]
 
@@ -63,6 +67,7 @@ GET /api/movies/popular
 
 GET /api/movies/new
   — Новинки (isNew = true)
+  Query: lastId, pageSize
   Ответ: (тот же массив что и /api/movies)
   [ { "id": 23, "title": "Дюна: Часть вторая", ... } ]
 
@@ -121,7 +126,10 @@ GET /api/movies/:id/related
 --------------
 
 GET /api/search
-  Query: q, genre, ageRating, yearFrom, yearTo, minRating, sortBy
+  — Полнотекстовый поиск (по названию, оригинальному названию, режиссёру, актёрам)
+  Query: q, genre, ageRating, yearFrom, yearTo, minRating, sortBy, lastId, pageSize
+         lastId   — id последнего фильма с предыдущей страницы (cursor)
+         pageSize — кол-во записей за раз (по умолчанию 20)
   Ответ:
   [
     {

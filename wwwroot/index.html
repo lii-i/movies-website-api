@@ -1,373 +1,848 @@
 <!DOCTYPE html>
 <html lang="ru">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>CineVault — Смотри лучшее кино</title>
-  <meta name="description"
-    content="CineVault — онлайн-кинотеатр с тысячами фильмов, сериалов и аниме в высоком качестве.">
-  <link rel="stylesheet" href="/css/style.css">
-</head>
+  <title>CineVault — Найди аниме</title>
+  <meta name="description" content="CineVault — поиск аниме с фильтрами по жанру, рейтингу, типу и статусу.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:    #07070d;
+      --card:  #13131e;
+      --glass: rgba(13,13,22,.80);
+      --gold:  #f5c518;
+      --gold2: #ff9f1c;
+      --txt:   #fff;
+      --txt2:  #9090aa;
+      --txt3:  #4a4a62;
+      --brd:   rgba(255,255,255,.07);
+      --brdh:  rgba(255,255,255,.14);
+      --r:     10px;
+      --r2:    18px;
+      --tr:    .3s cubic-bezier(.4,0,.2,1);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg);
+      color: var(--txt);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    a { color: inherit; text-decoration: none; }
+    button { cursor: pointer; border: none; font-family: inherit; }
+    input, select { font-family: inherit; }
 
+    /* ── Ambient glow orbs ── */
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(120px);
+      opacity: .18;
+      pointer-events: none;
+      z-index: 0;
+      animation: drift 12s ease-in-out infinite alternate;
+    }
+    .orb-1 { width: 600px; height: 600px; background: #4f46e5; top: -200px; left: -150px; animation-delay: 0s; }
+    .orb-2 { width: 500px; height: 500px; background: #f5c518; bottom: -100px; right: -100px; animation-delay: -5s; }
+    .orb-3 { width: 350px; height: 350px; background: #e63946; top: 40%; left: 60%; animation-delay: -9s; }
+    @keyframes drift {
+      from { transform: translate(0, 0) scale(1); }
+      to   { transform: translate(30px, -20px) scale(1.05); }
+    }
+
+    /* ── Header ── */
+    .header {
+      position: fixed; top: 0; left: 0; right: 0;
+      height: 60px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 28px;
+      background: rgba(7,7,13,.6);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--brd);
+      z-index: 1000;
+    }
+    .header-logo {
+      font-size: 1.25rem; font-weight: 800;
+      background: linear-gradient(135deg, var(--gold), var(--gold2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      letter-spacing: -.5px;
+    }
+    .header-nav { display: flex; align-items: center; gap: 8px; }
+    .btn-sm {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 18px; border-radius: 40px;
+      font-size: .85rem; font-weight: 600;
+      transition: var(--tr);
+    }
+    .btn-ghost {
+      background: rgba(255,255,255,.07);
+      color: var(--txt2);
+      border: 1px solid var(--brd);
+    }
+    .btn-ghost:hover { background: rgba(255,255,255,.13); color: var(--txt); }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--gold), var(--gold2));
+      color: #000; font-weight: 700;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(245,197,24,.3); }
+
+    /* ── Hero search area ── */
+    .hero-area {
+      position: relative; z-index: 1;
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 80px 24px 60px;
+      gap: 0;
+    }
+    .hero-logo {
+      font-size: clamp(2.8rem, 6vw, 5rem);
+      font-weight: 900;
+      background: linear-gradient(135deg, #fff 20%, var(--gold) 60%, var(--gold2) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      letter-spacing: -2px;
+      line-height: 1;
+      margin-bottom: 14px;
+      text-align: center;
+    }
+    .hero-tagline {
+      color: var(--txt2); font-size: 1.05rem; font-weight: 400;
+      margin-bottom: 48px; text-align: center;
+      letter-spacing: .2px;
+    }
+
+    /* ── Search box ── */
+    .search-wrap {
+      width: 100%; max-width: 720px;
+      display: flex; flex-direction: column; gap: 12px;
+    }
+    .search-row {
+      display: flex; align-items: center; gap: 10px;
+      background: rgba(255,255,255,.05);
+      backdrop-filter: blur(24px);
+      border: 1px solid var(--brdh);
+      border-radius: 60px;
+      padding: 8px 8px 8px 24px;
+      transition: var(--tr);
+      box-shadow: 0 8px 40px rgba(0,0,0,.45);
+    }
+    .search-row:focus-within {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(245,197,24,.14), 0 8px 40px rgba(0,0,0,.45);
+    }
+    .search-input {
+      flex: 1; background: none; border: none; outline: none;
+      color: var(--txt); font-size: 1.05rem; font-weight: 400;
+      min-width: 0;
+    }
+    .search-input::placeholder { color: var(--txt3); }
+    .search-btn {
+      flex-shrink: 0;
+      background: linear-gradient(135deg, var(--gold), var(--gold2));
+      color: #000; font-weight: 700; font-size: .9rem;
+      padding: 12px 28px; border-radius: 50px;
+      transition: var(--tr);
+      white-space: nowrap;
+    }
+    .search-btn:hover { transform: scale(1.04); box-shadow: 0 6px 20px rgba(245,197,24,.35); }
+
+    /* ── Filters toggle ── */
+    .filter-toggle-row {
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+    }
+    .filter-toggle-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid var(--brd);
+      color: var(--txt2); font-size: .85rem; font-weight: 500;
+      padding: 8px 18px; border-radius: 40px;
+      transition: var(--tr);
+    }
+    .filter-toggle-btn:hover, .filter-toggle-btn.active {
+      border-color: var(--gold); color: var(--gold);
+      background: rgba(245,197,24,.08);
+    }
+    .filter-arrow {
+      transition: transform .25s ease;
+      display: inline-block;
+      font-style: normal;
+    }
+    .filter-toggle-btn.active .filter-arrow { transform: rotate(180deg); }
+    .active-count {
+      background: var(--gold); color: #000;
+      font-size: .72rem; font-weight: 800;
+      padding: 1px 7px; border-radius: 20px;
+      display: none;
+    }
+    .active-count.show { display: inline; }
+
+    /* ── Filter panel ── */
+    .filter-panel {
+      width: 100%; max-width: 720px;
+      background: rgba(19,19,30,.88);
+      backdrop-filter: blur(24px);
+      border: 1px solid var(--brd);
+      border-radius: var(--r2);
+      overflow: hidden;
+      max-height: 0;
+      opacity: 0;
+      transform: translateY(-8px);
+      transition: max-height .35s ease, opacity .3s ease, transform .3s ease;
+    }
+    .filter-panel.open {
+      max-height: 600px;
+      opacity: 1;
+      transform: none;
+    }
+    .filter-panel-inner { padding: 24px; display: flex; flex-direction: column; gap: 20px; }
+
+    .filter-section-label {
+      font-size: .72rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .8px; color: var(--txt3); margin-bottom: 8px;
+    }
+    .pills {
+      display: flex; flex-wrap: wrap; gap: 8px;
+    }
+    .pill {
+      padding: 6px 14px; border-radius: 40px;
+      border: 1px solid var(--brd); color: var(--txt2);
+      font-size: .82rem; font-weight: 500;
+      background: none; transition: var(--tr);
+    }
+    .pill:hover { border-color: var(--brdh); color: var(--txt); }
+    .pill.active {
+      background: var(--gold); color: #000;
+      border-color: var(--gold); font-weight: 700;
+    }
+    .filter-row { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start; }
+    .filter-col { flex: 1; min-width: 140px; }
+
+    .filter-select {
+      width: 100%;
+      background: rgba(255,255,255,.05);
+      border: 1px solid var(--brd);
+      color: var(--txt2); padding: 9px 14px;
+      border-radius: var(--r); font-size: .85rem;
+      outline: none; cursor: pointer; transition: var(--tr);
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239090aa' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 12px center;
+      padding-right: 36px;
+    }
+    .filter-select:focus { border-color: var(--gold); color: var(--txt); }
+    .filter-select option { background: #13131e; }
+
+    .range-wrap { display: flex; align-items: center; gap: 12px; }
+    .range-wrap input[type=range] {
+      flex: 1; accent-color: var(--gold);
+      appearance: none; height: 4px;
+      background: var(--brd); border-radius: 4px; outline: none;
+    }
+    .range-wrap input[type=range]::-webkit-slider-thumb {
+      appearance: none; width: 18px; height: 18px;
+      border-radius: 50%; background: var(--gold);
+      box-shadow: 0 0 8px rgba(245,197,24,.5); cursor: pointer;
+    }
+    .range-val { color: var(--gold); font-weight: 700; font-size: .9rem; min-width: 32px; }
+
+    .filter-actions {
+      display: flex; justify-content: flex-end; gap: 8px;
+      padding-top: 4px; border-top: 1px solid var(--brd);
+    }
+    .btn-reset {
+      background: none; border: 1px solid var(--brd);
+      color: var(--txt3); font-size: .82rem; font-weight: 500;
+      padding: 8px 16px; border-radius: 40px; transition: var(--tr);
+    }
+    .btn-reset:hover { border-color: var(--red, #e63946); color: #e63946; }
+
+    /* ── Results section ── */
+    .results-section {
+      position: relative; z-index: 1;
+      width: 100%; max-width: 1320px;
+      margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+    .results-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 24px;
+    }
+    .results-title {
+      font-size: 1.1rem; font-weight: 700; color: var(--txt2);
+    }
+    .results-title span { color: var(--txt); }
+    .results-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 20px;
+    }
+    /* ── Movie card ── */
+    .movie-card {
+      background: var(--card);
+      border: 1px solid var(--brd);
+      border-radius: var(--r2);
+      overflow: hidden;
+      cursor: pointer;
+      transition: var(--tr);
+      position: relative;
+      group: true;
+    }
+    .movie-card:hover {
+      transform: translateY(-8px) scale(1.015);
+      border-color: rgba(245,197,24,.35);
+      box-shadow: 0 20px 56px rgba(0,0,0,.6), 0 0 0 1px rgba(245,197,24,.12);
+    }
+    .movie-card:hover .card-poster {
+      transform: scale(1.05);
+    }
+    .movie-card:hover .card-overlay {
+      opacity: 1;
+    }
+    .poster-wrap {
+      position: relative; overflow: hidden;
+      aspect-ratio: 2/3;
+    }
+    .card-poster {
+      width: 100%; height: 100%; object-fit: cover;
+      background: linear-gradient(135deg, #1a1a2e, #16213e);
+      display: block;
+      transition: transform .4s cubic-bezier(.4,0,.2,1);
+    }
+    /* Gradient overlay always visible at bottom */
+    .card-gradient {
+      position: absolute; inset: 0;
+      background: linear-gradient(to top, rgba(7,7,13,.95) 0%, rgba(7,7,13,.3) 40%, transparent 70%);
+      pointer-events: none;
+    }
+    /* Hover overlay */
+    .card-overlay {
+      position: absolute; inset: 0;
+      background: rgba(7,7,13,.55);
+      backdrop-filter: blur(2px);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0;
+      transition: opacity .25s ease;
+    }
+    .card-play-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: linear-gradient(135deg, var(--gold), var(--gold2));
+      color: #000; font-weight: 700; font-size: .85rem;
+      padding: 10px 22px; border-radius: 40px;
+      transform: translateY(4px);
+      transition: transform .25s ease;
+      pointer-events: none;
+    }
+    .movie-card:hover .card-play-btn {
+      transform: translateY(0);
+    }
+    /* Rating badge */
+    .card-rating {
+      position: absolute; top: 10px; right: 10px;
+      background: rgba(0,0,0,.8); backdrop-filter: blur(10px);
+      color: var(--gold); font-size: .78rem; font-weight: 700;
+      padding: 3px 9px; border-radius: 20px;
+      border: 1px solid rgba(245,197,24,.2);
+      z-index: 2;
+    }
+    /* Kind badge */
+    .card-kind {
+      position: absolute; top: 10px; left: 10px;
+      background: rgba(0,0,0,.75); backdrop-filter: blur(8px);
+      color: var(--txt2); font-size: .7rem; font-weight: 600;
+      padding: 3px 8px; border-radius: 20px;
+      text-transform: uppercase; letter-spacing: .4px;
+      z-index: 2;
+    }
+    .card-info { padding: 12px 14px 14px; }
+    .card-title {
+      font-size: .9rem; font-weight: 600;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      margin-bottom: 5px; color: var(--txt);
+    }
+    .card-sub { font-size: .78rem; color: var(--txt2); }
+
+    /* Empty / loading state */
+    .state-box {
+      text-align: center; padding: 60px 20px;
+      color: var(--txt3);
+    }
+    .state-box .icon { font-size: 3rem; margin-bottom: 16px; }
+    .state-box p { font-size: 1rem; }
+    .skeleton-card {
+      background: var(--card); border-radius: var(--r2);
+      aspect-ratio: 2/3; animation: shimmer 1.4s infinite;
+    }
+    @keyframes shimmer {
+      0%, 100% { opacity: .5; }
+      50%       { opacity: .9; }
+    }
+
+    /* ── Pagination ── */
+    .pagination {
+      display: flex; align-items: center; justify-content: center;
+      gap: 8px; padding: 40px 0 0;
+    }
+    .page-btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 40px; height: 40px; padding: 0 14px;
+      border-radius: var(--r); font-size: .88rem; font-weight: 600;
+      background: rgba(255,255,255,.05);
+      border: 1px solid var(--brd); color: var(--txt2);
+      transition: var(--tr); cursor: pointer;
+    }
+    .page-btn:hover:not(:disabled) {
+      border-color: var(--gold); color: var(--gold);
+      background: rgba(245,197,24,.08);
+    }
+    .page-btn.active {
+      background: linear-gradient(135deg, var(--gold), var(--gold2));
+      color: #000; border-color: transparent; font-weight: 700;
+    }
+    .page-btn:disabled {
+      opacity: .3; cursor: not-allowed;
+    }
+    .page-dots {
+      color: var(--txt3); font-size: .9rem; padding: 0 4px;
+    }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--brd); border-radius: 3px; }
+  </style>
+</head>
 <body>
+
+  <!-- Ambient background -->
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <!-- Minimal header -->
   <header class="header">
-    <div class="header-left">
-      <div class="menu-wrap">
-        <button class="burger-btn" id="burgerBtn" aria-label="Меню">☰</button>
-        <div class="menu-dropdown" id="menuDropdown">
-          <a href="/account.html" class="menu-item">👤 Мой профиль</a>
-          <a href="/account.html#watchlist" class="menu-item">🔖 Список просмотра</a>
-          <a href="/account.html#history" class="menu-item">🕓 История</a>
-          <div class="menu-divider"></div>
-          <a href="/genres.html" class="menu-item">🎬 Жанры</a>
-          <a href="/search.html?sort=rating" class="menu-item">⭐ Топ фильмов</a>
-          <a href="/search.html?new=true" class="menu-item">🆕 Новинки</a>
-          <div class="menu-divider"></div>
-          <a href="#" class="menu-item" onclick="logout();return false">⚙️ Настройки</a>
-          <a href="#" class="menu-item danger" onclick="logout();return false">🚪 Выйти</a>
-        </div>
-      </div>
-    </div>
-    <a href="/index.html" class="header-logo">🎬 CineVault</a>
-    <div class="header-right">
-      <div class="header-search">
-        <span>🔍</span>
-        <input type="text" id="headerSearch" placeholder="Поиск...">
-      </div>
-      <a href="/auth.html" class="btn btn-primary btn-sm" id="authBtn">Войти</a>
-    </div>
+    <a href="/" class="header-logo">🎬 CineVault</a>
+    <nav class="header-nav">
+      <a href="/auth.html" class="btn-sm btn-ghost" id="authBtn">Войти</a>
+    </nav>
   </header>
 
-  <main class="page">
-    <!-- HERO -->
-    <section class="hero" id="heroSection"></section>
+  <!-- Hero / Search -->
+  <section class="hero-area" id="heroArea">
+    <div class="hero-logo">🎬 CineVault</div>
+    <p class="hero-tagline">Найди своё следующее аниме</p>
 
-    <!-- FILTERS -->
-    <div class="filters" id="filtersBar">
-      <div class="container">
-        <div class="filters-inner">
-          <div class="filter-group">
-            <span class="filter-label">Жанр</span>
-            <div class="genre-scroll" id="genreScroll"></div>
+    <div class="search-wrap">
+      <!-- Search input row -->
+      <div class="search-row">
+        <input
+          type="text"
+          class="search-input"
+          id="searchInput"
+          placeholder="Название аниме..."
+          autocomplete="off"
+        >
+        <button class="search-btn" id="searchBtn">🔍 Найти</button>
+      </div>
+
+      <!-- Filter toggle -->
+      <div class="filter-toggle-row">
+        <button class="filter-toggle-btn" id="filterToggleBtn">
+          ⚙ Фильтры
+          <span class="active-count" id="activeCount">0</span>
+          <i class="filter-arrow">▾</i>
+        </button>
+      </div>
+
+      <!-- Filter panel -->
+      <div class="filter-panel" id="filterPanel">
+        <div class="filter-panel-inner">
+
+          <!-- Жанр -->
+          <div>
+            <div class="filter-section-label">Жанр</div>
+            <div class="pills" id="genrePills"></div>
           </div>
-          <div class="filters-divider"></div>
-          <div class="filter-group">
-            <span class="filter-label">Рейтинг</span>
-            <div class="rating-range">
-              <input type="range" id="ratingRange" min="0" max="10" step="0.5" value="0">
-              <span class="rating-val" id="ratingVal">0+</span>
+
+          <!-- Тип / Возраст -->
+          <div class="filter-row">
+            <div class="filter-col">
+              <div class="filter-section-label">Тип</div>
+              <div class="pills" id="kindPills"></div>
+            </div>
+            <div class="filter-col">
+              <div class="filter-section-label">Статус</div>
+              <div class="pills" id="statusPills"></div>
             </div>
           </div>
-          <div class="filters-divider"></div>
-          <div class="filter-group">
-            <span class="filter-label">Возраст</span>
-            <select class="filter-select" id="ageSelect">
-              <option value="">Все</option>
-              <option>0+</option>
-              <option>6+</option>
-              <option>12+</option>
-              <option>13+</option>
-              <option>16+</option>
-              <option>18+</option>
-            </select>
+
+          <!-- Рейтинг / Возраст -->
+          <div class="filter-row">
+            <div class="filter-col">
+              <div class="filter-section-label">Мин. рейтинг</div>
+              <div class="range-wrap">
+                <input type="range" id="ratingRange" min="0" max="9" step="1" value="0">
+                <span class="range-val" id="ratingVal">0+</span>
+              </div>
+            </div>
+            <div class="filter-col">
+              <div class="filter-section-label">Возрастной рейтинг</div>
+              <select class="filter-select" id="ageSelect">
+                <option value="">Любой</option>
+                <option value="g">G — Для всех</option>
+                <option value="pg">PG</option>
+                <option value="pg_13">PG-13</option>
+                <option value="r">R — 17+</option>
+                <option value="r_plus">R+ — 18+</option>
+              </select>
+            </div>
           </div>
-          <div class="filters-divider"></div>
-          <div class="filter-group">
-            <span class="filter-label">Год</span>
-            <select class="filter-select" id="yearFrom">
-              <option value="">От</option>
-              <option>1990</option>
-              <option>2000</option>
-              <option>2010</option>
-              <option>2015</option>
-              <option>2020</option>
-              <option>2023</option>
-            </select>
-            <select class="filter-select" id="yearTo">
-              <option value="">До</option>
-              <option>2000</option>
-              <option>2010</option>
-              <option>2015</option>
-              <option>2020</option>
-              <option>2024</option>
-            </select>
+
+          <!-- Сортировка / Лимит -->
+          <div class="filter-row">
+            <div class="filter-col">
+              <div class="filter-section-label">Сортировка</div>
+              <select class="filter-select" id="sortSelect">
+                <option value="ranked">По рейтингу</option>
+                <option value="popularity">По популярности</option>
+                <option value="name">По названию</option>
+                <option value="aired_on">По дате выхода</option>
+              </select>
+            </div>
+            <div class="filter-col">
+              <div class="filter-section-label">Количество результатов</div>
+              <select class="filter-select" id="limitSelect">
+                <option value="10">10</option>
+                <option value="20" selected>20</option>
+                <option value="40">40</option>
+              </select>
+            </div>
           </div>
-          <div class="filters-divider"></div>
-          <div class="filter-group">
-            <span class="filter-label">Сортировка</span>
-            <select class="filter-select" id="sortBy">
-              <option value="popular">По популярности</option>
-              <option value="rating">По рейтингу</option>
-              <option value="year">По году</option>
-              <option value="title">По названию</option>
-            </select>
+
+          <div class="filter-actions">
+            <button class="btn-reset" id="resetBtn">✕ Сбросить фильтры</button>
           </div>
-          <button class="btn btn-ghost btn-sm" id="resetFilters">✕ Сбросить</button>
         </div>
       </div>
     </div>
+  </section>
 
-    <!-- FEATURED STRIP -->
-    <div class="container">
-      <section class="section">
-        <h2 class="section-title">Популярное сейчас <a href="/search.html?popular=1" class="see-all">Все →</a></h2>
-        <div class="movie-grid" id="popularGrid"></div>
-      </section>
-
-      <section class="section">
-        <h2 class="section-title">Новинки <a href="/search.html?new=1" class="see-all">Все →</a></h2>
-        <div class="movie-grid" id="newGrid"></div>
-      </section>
-
-      <section class="section">
-        <h2 class="section-title">Все фильмы</h2>
-        <div class="movie-grid" id="mainGrid"></div>
-        <div class="loader-wrap" id="loader" style="display:none">
-          <div class="loader"></div>
-        </div>
-      </section>
+  <!-- Results -->
+  <section class="results-section" id="resultsSection" style="display:none">
+    <div class="results-header">
+      <div class="results-title" id="resultsTitle">Результаты</div>
     </div>
-  </main>
+    <div class="results-grid" id="resultsGrid"></div>
+    <nav class="pagination" id="pagination" aria-label="Страницы результатов"></nav>
+  </section>
 
-  <footer class="footer">
-    <div class="container">
-      <div class="footer-grid">
-        <div class="footer-brand">
-          <h3>🎬 CineVault</h3>
-          <p>Лучший онлайн-кинотеатр с огромной коллекцией фильмов, сериалов и аниме. Смотри где угодно и когда угодно.
-          </p>
-        </div>
-        <div class="footer-col">
-          <h4>Контент</h4>
-          <ul class="footer-links">
-            <li><a href="/genres.html">Фильмы</a></li>
-            <li><a href="/search.html?new=1">Новинки</a></li>
-            <li><a href="/search.html?sort=rating">Топ рейтинга</a></li>
-            <li><a href="/genres.html">Жанры</a></li>
-          </ul>
-        </div>
-        <div class="footer-col">
-          <h4>Аккаунт</h4>
-          <ul class="footer-links">
-            <li><a href="/auth.html">Войти</a></li>
-            <li><a href="/auth.html?tab=register">Регистрация</a></li>
-            <li><a href="/account.html">Профиль</a></li>
-            <li><a href="/account.html#watchlist">Список</a></li>
-          </ul>
-        </div>
-        <div class="footer-col">
-          <h4>Помощь</h4>
-          <ul class="footer-links">
-            <li><a href="#">О нас</a></li>
-            <li><a href="#">Контакты</a></li>
-            <li><a href="#">Конфиденциальность</a></li>
-            <li><a href="#">Условия</a></li>
-          </ul>
-        </div>
-      </div>
-      <div class="footer-bottom">
-        <span>© 2024 CineVault. Все права защищены.</span>
-        <span>Только для образовательных целей</span>
-      </div>
-    </div>
-  </footer>
-
-  <div class="toast-container" id="toastContainer"></div>
-
-  <script src="/js/data.js"></script>
-  <script src="/js/api.js"></script>
   <script>
-    // Header auth
-    const user = getCurrentUser();
-    if (user) document.getElementById('authBtn').outerHTML = `<a href="/account.html" class="btn btn-ghost btn-sm">👤 ${user.name}</a>`;
+    // ── Data ──────────────────────────────────────────────────────────────────
+    const GENRES = [
+      { label: 'Экшн',               value: 'Экшн' },
+      { label: 'Приключения',        value: 'Приключения' },
+      { label: 'Комедия',            value: 'Комедия' },
+      { label: 'Драма',              value: 'Драма' },
+      { label: 'Фэнтези',            value: 'Фэнтези' },
+      { label: 'Ужасы',              value: 'Ужасы' },
+      { label: 'Меха',               value: 'Меха' },
+      { label: 'Музыка',             value: 'Музыка' },
+      { label: 'Мистика',            value: 'Мистика' },
+      { label: 'Романтика',          value: 'Романтика' },
+      { label: 'Фантастика',         value: 'Фантастика' },
+      { label: 'Спорт',              value: 'Спорт' },
+      { label: 'Сверхъестественное', value: 'Сверхъестественное' },
+      { label: 'Триллер',            value: 'Триллер' },
+      { label: 'Психологическое',    value: 'Психологическое' },
+      { label: 'Повседневность',     value: 'Повседневность' },
+      { label: 'Магия',              value: 'Магия' },
+      { label: 'Военное',            value: 'Военное' },
+      { label: 'Самурайское',        value: 'Самурайское' },
+    ];
+    const KINDS = [
+      { label: 'TV сериал', value: 'tv' },
+      { label: 'Фильм',     value: 'movie' },
+      { label: 'OVA',       value: 'ova' },
+      { label: 'ONA',       value: 'ona' },
+      { label: 'Special',   value: 'special' },
+    ];
+    const STATUSES = [
+      { label: 'Все',        value: '' },
+      { label: 'Выходит',    value: 'ongoing' },
+      { label: 'Завершён',   value: 'released' },
+      { label: 'Анонсирован',value: 'anons' },
+    ];
 
-    // Burger menu
-    const burgerBtn = document.getElementById('burgerBtn');
-    const menuDropdown = document.getElementById('menuDropdown');
-    burgerBtn.addEventListener('click', e => { e.stopPropagation(); menuDropdown.classList.toggle('open') });
-    document.addEventListener('click', () => menuDropdown.classList.remove('open'));
+    // ── State ─────────────────────────────────────────────────────────────────
+    let activeGenre = '';
+    let activeKind  = '';
+    let activeStatus = '';
 
-    // Header search
-    document.getElementById('headerSearch').addEventListener('keydown', e => {
-      if (e.key === 'Enter') { window.location.href = `/search.html?q=${encodeURIComponent(e.target.value)}` }
+    // ── Pill builders ─────────────────────────────────────────────────────────
+    function buildPills(containerId, items, getActive, setActive) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = items.map(item => {
+        const val   = typeof item === 'string' ? item : item.value;
+        const label = typeof item === 'string' ? item : item.label;
+        return `<button class="pill ${getActive() === val ? 'active' : ''}"
+          data-val="${val}"
+          onclick="selectPill('${containerId}', '${val}', setActive_${containerId})">${label}</button>`;
+      }).join('');
+    }
+
+    function selectPill(containerId, val, setter) {
+      // toggle
+      const prev = getActiveFor(containerId);
+      setActiveFor(containerId, prev === val ? '' : val);
+      refreshPills(containerId);
+      updateActiveCount();
+    }
+
+    function getActiveFor(id) {
+      if (id === 'genrePills')   return activeGenre;
+      if (id === 'kindPills')    return activeKind;
+      if (id === 'statusPills')  return activeStatus;
+      return '';
+    }
+    function setActiveFor(id, val) {
+      if (id === 'genrePills')  activeGenre  = val;
+      if (id === 'kindPills')   activeKind   = val;
+      if (id === 'statusPills') activeStatus = val;
+    }
+
+    function refreshPills(containerId) {
+      document.querySelectorAll(`#${containerId} .pill`).forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.val === getActiveFor(containerId));
+      });
+    }
+
+    // Genre pills onclick need a global handler
+    function pillClick(containerId, val) {
+      const prev = getActiveFor(containerId);
+      setActiveFor(containerId, prev === val ? '' : val);
+      refreshPills(containerId);
+      updateActiveCount();
+    }
+
+    function buildPillsSimple(containerId, items) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = items.map(item => {
+        const val   = typeof item === 'string' ? item : item.value;
+        const label = typeof item === 'string' ? item : item.label;
+        return `<button class="pill" data-val="${val}"
+          onclick="pillClick('${containerId}', '${val}')">${label}</button>`;
+      }).join('');
+    }
+
+    // ── Filter panel toggle ───────────────────────────────────────────────────
+    const filterToggleBtn = document.getElementById('filterToggleBtn');
+    const filterPanel     = document.getElementById('filterPanel');
+
+    filterToggleBtn.addEventListener('click', () => {
+      const open = filterPanel.classList.toggle('open');
+      filterToggleBtn.classList.toggle('active', open);
     });
 
-    // Hero — GET /api/movies/featured
-    async function renderHero() {
-      const featured = await apiGetFeatured();
-      const m = featured[Math.floor(Math.random() * featured.length)];
-      document.getElementById('heroSection').innerHTML = `
-    <img class="hero-img" src="${m.backdrop}" alt="${m.title}" onerror="this.src='https://picsum.photos/seed/${m.id}bg/1400/600'">
-    <div class="hero-overlay"></div>
-    <div class="hero-content">
-      <span class="hero-badge">🔥 В тренде</span>
-      <h1 class="hero-title">${m.title}</h1>
-      <div class="hero-meta">
-        <span class="hero-rating">★ ${m.rating}</span>
-        <span>${m.year}</span>
-        <span>${formatDuration(m.duration)}</span>
-        <span>${m.ageRating}</span>
-        <span>${m.genres[0]}</span>
-      </div>
-      <p class="hero-desc">${m.description}</p>
-      <div class="hero-btns">
-        <a href="/movie.html?id=${m.id}" class="btn btn-primary">▶ Смотреть</a>
-        <a href="/movie.html?id=${m.id}" class="btn btn-ghost">ℹ Подробнее</a>
-      </div>
-    </div>`;
-    }
-
-    // Movie card
-    function movieCard(m) {
-      const inWl = isInWatchlist(m.id);
-      return `<div class="movie-card" onclick="location.href='/movie.html?id=${m.id}'">
-    <img class="card-poster" src="${m.poster}" alt="${m.title}" loading="lazy" onerror="this.style.background='linear-gradient(135deg,${m.gradientFrom},${m.gradientTo})'">
-    ${m.isNew ? '<span class="card-badge badge-new">NEW</span>' : m.isPopular ? '<span class="card-badge badge-hot">HOT</span>' : ''}
-    <span class="card-rating">★ ${m.rating}</span>
-    <div class="card-overlay">
-      <div class="card-overlay-title">${m.title}</div>
-      <div class="card-overlay-meta"><span>${m.year}</span><span>${formatDuration(m.duration)}</span></div>
-      <div class="card-overlay-btns">
-        <a href="/movie.html?id=${m.id}" class="btn btn-primary btn-sm" onclick="event.stopPropagation()">▶ Смотреть</a>
-        <button class="watchlist-btn ${inWl ? 'active' : ''}" onclick="event.stopPropagation();toggleWl(${m.id},this)" title="В список">${inWl ? '🔖' : '＋'}</button>
-      </div>
-    </div>
-    <div class="card-info">
-      <div class="card-title">${m.title}</div>
-      <div class="card-sub">${m.year} · ${m.genres[0]}</div>
-    </div>
-  </div>`;
-    }
-
-    function toggleWl(id, btn) {
-      const added = toggleWatchlist(id);
-      btn.classList.toggle('active', added);
-      btn.textContent = added ? '🔖' : '＋';
-      showToast(added ? '🔖 Добавлено в список' : 'Удалено из списка', added ? 'success' : '');
-    }
-
-    // Toast
-    function showToast(msg, type = '') {
-      const t = document.createElement('div');
-      t.className = `toast ${type ? 'toast-' + type : ''}`;
-      t.innerHTML = `<span class="toast-icon">${type === 'success' ? '✅' : 'ℹ'}</span><span>${msg}</span>`;
-      document.getElementById('toastContainer').appendChild(t);
-      setTimeout(() => t.remove(), 3000);
-    }
-
-    // Filters
-    let activeGenre = '', isLoadingMore = false, hasMore = true;
-    const PAGE_SIZE = 20;
-
-    function renderGenres() {
-      const genres = ['Все', ...GENRES];
-      document.getElementById('genreScroll').innerHTML = genres.map(g =>
-        `<button class="genre-pill ${g === 'Все' && !activeGenre ? 'active' : g === activeGenre ? 'active' : ''}" onclick="setGenre('${g === 'Все' ? '' : g}')">${g}</button>`
-      ).join('');
-    }
-
-    function setGenre(g) {
-      activeGenre = g;
-      applyFilters();
-      renderGenres();
+    // ── Active filter count ───────────────────────────────────────────────────
+    function updateActiveCount() {
+      let n = 0;
+      if (activeGenre)  n++;
+      if (activeKind)   n++;
+      if (activeStatus) n++;
+      if (document.getElementById('ratingRange').value > 0) n++;
+      if (document.getElementById('ageSelect').value)    n++;
+      const el = document.getElementById('activeCount');
+      el.textContent = n;
+      el.classList.toggle('show', n > 0);
     }
 
     document.getElementById('ratingRange').addEventListener('input', function () {
       document.getElementById('ratingVal').textContent = this.value > 0 ? this.value + '+' : '0+';
-      applyFilters();
+      updateActiveCount();
     });
-    document.getElementById('ageSelect').addEventListener('change', applyFilters);
-    document.getElementById('yearFrom').addEventListener('change', applyFilters);
-    document.getElementById('yearTo').addEventListener('change', applyFilters);
-    document.getElementById('sortBy').addEventListener('change', applyFilters);
-    document.getElementById('resetFilters').addEventListener('click', () => {
-      activeGenre = '';
+    document.getElementById('ageSelect').addEventListener('change', updateActiveCount);
+
+    // ── Reset ─────────────────────────────────────────────────────────────────
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      activeGenre = activeKind = activeStatus = '';
       document.getElementById('ratingRange').value = 0;
       document.getElementById('ratingVal').textContent = '0+';
       document.getElementById('ageSelect').value = '';
-      document.getElementById('yearFrom').value = '';
-      document.getElementById('yearTo').value = '';
-      document.getElementById('sortBy').value = 'popular';
-      renderGenres();
-      applyFilters();
+      document.getElementById('sortSelect').value = 'ranked';
+      document.getElementById('limitSelect').value = '20';
+      ['genrePills','kindPills','statusPills'].forEach(id => refreshPills(id));
+      updateActiveCount();
     });
 
-    // Возвращает id последней карточки в гриде (для cursor)
-    function getLastId(gridId) {
-      const cards = document.getElementById(gridId).querySelectorAll('.movie-card[data-id]');
-      if (!cards.length) return null;
-      return parseInt(cards[cards.length - 1].dataset.id);
+    // ── Pagination state ──────────────────────────────────────────────────────
+    let currentPage = 1;
+    let lastQueryParams = new URLSearchParams();
+
+    // ── Search ────────────────────────────────────────────────────────────────
+    document.getElementById('searchBtn').addEventListener('click', doSearch);
+    document.getElementById('searchInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') doSearch();
+    });
+
+    function buildParams() {
+      const title  = document.getElementById('searchInput').value.trim();
+      const limit  = document.getElementById('limitSelect').value;
+      const rating = document.getElementById('ratingRange').value;
+      const age    = document.getElementById('ageSelect').value;
+      const sort   = document.getElementById('sortSelect').value;
+
+      const params = new URLSearchParams();
+      if (title)        params.set('title', title);
+      if (limit)        params.set('limit', limit);
+      if (rating > 0)   params.set('minRating', rating);
+      if (age)          params.set('mpaaRating', age);
+      if (activeGenre)  params.set('genres', activeGenre);
+      if (activeKind)   params.set('kind', activeKind);
+      if (activeStatus) params.set('status', activeStatus);
+      if (sort)         params.set('order', sort);
+      return params;
     }
 
-    // Добавляет карточки в грид с data-id для cursor
-    function appendCards(gridId, movies) {
-      const grid = document.getElementById(gridId);
-      movies.forEach(m => {
-        const wrap = document.createElement('div');
-        wrap.innerHTML = movieCard(m);
-        const card = wrap.firstElementChild;
-        card.dataset.id = m.id;
-        grid.appendChild(card);
-      });
+    async function doSearch() {
+      currentPage = 1;
+      lastQueryParams = buildParams();
+      await fetchPage(currentPage);
     }
 
-    // GET /api/movies — сброс и первая страница
-    async function applyFilters() {
-      hasMore = true;
-      isLoadingMore = false;
-      document.getElementById('mainGrid').innerHTML = '';
-      await loadMoreMovies();
-    }
+    async function fetchPage(page) {
+      const params = new URLSearchParams(lastQueryParams);
+      if (page > 1) params.set('page', page);
 
-    // GET /api/movies?lastId=... — следующая страница
-    async function loadMoreMovies() {
-      if (isLoadingMore || !hasMore) return;
-      isLoadingMore = true;
+      showLoading();
 
-      const lastId = getLastId('mainGrid');
-      const batch = await apiGetMovies({
-        genre: activeGenre,
-        ageRating: document.getElementById('ageSelect').value,
-        yearFrom: document.getElementById('yearFrom').value,
-        yearTo: document.getElementById('yearTo').value,
-        minRating: document.getElementById('ratingRange').value > 0 ? document.getElementById('ratingRange').value : '',
-        sortBy: document.getElementById('sortBy').value,
-        lastId: lastId,
-        pageSize: PAGE_SIZE
-      });
-
-      appendCards('mainGrid', batch);
-      if (batch.length < PAGE_SIZE) hasMore = false;
-      isLoadingMore = false;
-    }
-
-    // Infinite scroll
-    const observer = new IntersectionObserver(async entries => {
-      if (entries[0].isIntersecting && !isLoadingMore && hasMore) {
-        const loader = document.getElementById('loader');
-        loader.style.display = 'flex';
-        await loadMoreMovies();
-        loader.style.display = 'none';
+      try {
+        const res = await fetch(`/search?${params.toString()}`);
+        if (!res.ok) throw new Error('API error ' + res.status);
+        const data = await res.json();
+        const items = data.items ?? data;
+        const limit = parseInt(params.get('limit') || '20');
+        renderResults(items, params.get('title') || '');
+        renderPagination(page, items.length >= limit);
+        currentPage = page;
+      } catch (err) {
+        showError(err.message);
+        document.getElementById('pagination').innerHTML = '';
       }
-    }, { threshold: 0.1 });
+    }
 
-    // Init — вызывает API endpoints
-    async function init() {
-      renderHero();
-      renderGenres();
-      // GET /popular
-      const popular = await apiGetPopular();
-      appendCards('popularGrid', popular.slice(0, 6));
-      // GET /api/movies/new
-      const newMovies = await apiGetNew();
-      appendCards('newGrid', newMovies.slice(0, 6));
-      // GET /api/movies — первая страница
-      await applyFilters();
-      observer.observe(document.getElementById('loader'));
+    function renderPagination(page, hasNext) {
+      const nav = document.getElementById('pagination');
+      if (page === 1 && !hasNext) { nav.innerHTML = ''; return; }
+
+      const prevDisabled = page <= 1 ? 'disabled' : '';
+      const nextDisabled = !hasNext  ? 'disabled' : '';
+
+      // Show window: first, ..., page-1, page, page+1, ...
+      let pagesHtml = '';
+      if (page > 2) {
+        pagesHtml += `<button class="page-btn" onclick="goToPage(1)">1</button>`;
+        if (page > 3) pagesHtml += `<span class="page-dots">…</span>`;
+      }
+      if (page > 1)
+        pagesHtml += `<button class="page-btn" onclick="goToPage(${page - 1})">${page - 1}</button>`;
+
+      pagesHtml += `<button class="page-btn active">${page}</button>`;
+
+      if (hasNext)
+        pagesHtml += `<button class="page-btn" onclick="goToPage(${page + 1})">${page + 1}</button>`;
+
+      nav.innerHTML = `
+        <button class="page-btn" onclick="goToPage(${page - 1})" ${prevDisabled}
+          aria-label="Предыдущая страница">← Назад</button>
+        ${pagesHtml}
+        <button class="page-btn" onclick="goToPage(${page + 1})" ${nextDisabled}
+          aria-label="Следующая страница">Вперёд →</button>
+      `;
+    }
+
+    function goToPage(page) {
+      if (page < 1) return;
+      window.scrollTo({ top: document.getElementById('resultsSection').offsetTop - 80, behavior: 'smooth' });
+      fetchPage(page);
+    }
+
+    // ── Render results ────────────────────────────────────────────────────────
+    function showLoading() {
+      // Collapse hero vertically
+      document.getElementById('heroArea').style.minHeight = '220px';
+      document.getElementById('heroArea').style.paddingBottom = '40px';
+
+      const section = document.getElementById('resultsSection');
+      section.style.display = 'block';
+      document.getElementById('resultsTitle').textContent = 'Поиск…';
+      document.getElementById('resultsGrid').innerHTML =
+        Array(8).fill('<div class="skeleton-card"></div>').join('');
+    }
+
+    function renderResults(items, query) {
+      const grid  = document.getElementById('resultsGrid');
+      const title = document.getElementById('resultsTitle');
+
+      title.innerHTML = query
+        ? `Результаты по: <span>«${query}»</span> — найдено ${items.length}`
+        : `Найдено аниме: <span>${items.length}</span>`;
+
+      if (!items.length) {
+        grid.innerHTML = `<div class="state-box" style="grid-column:1/-1">
+          <div class="icon">🔍</div><p>Ничего не найдено. Попробуй другой запрос или измени фильтры.</p>
+        </div>`;
+        return;
+      }
+
+      grid.innerHTML = items.map(m => {
+        const kindLabel = { tv:'TV', movie:'Фильм', ova:'OVA', ona:'ONA', special:'Special', music:'Music' }[m.kind] ?? m.kind ?? '';
+        const rating    = m.rating ? m.rating.toFixed(1) : '—';
+        const sub       = [m.year, m.genres?.[0]].filter(Boolean).join(' · ');
+        const poster    = m.poster || '';
+        return `
+        <div class="movie-card" role="button" tabindex="0"
+          onclick="location.href='/movie.html?id=${m.id}'"
+          onkeydown="if(event.key==='Enter')location.href='/movie.html?id=${m.id}'">
+          <div class="poster-wrap">
+            <img class="card-poster"
+              src="${poster}"
+              alt="${m.title}"
+              loading="lazy"
+              onerror="this.src='';this.style.background='linear-gradient(135deg,#1a1a2e,#16213e)'">
+            <div class="card-gradient"></div>
+            ${kindLabel ? `<div class="card-kind">${kindLabel}</div>` : ''}
+            <div class="card-rating">★ ${rating}</div>
+            <div class="card-overlay">
+              <div class="card-play-btn">▶ Смотреть</div>
+            </div>
+          </div>
+          <div class="card-info">
+            <div class="card-title">${m.title}</div>
+            <div class="card-sub">${sub}</div>
+          </div>
+        </div>`;
+      }).join('');
+
+    }
+
+    function showError(msg) {
+      document.getElementById('resultsTitle').textContent = 'Ошибка';
+      document.getElementById('resultsGrid').innerHTML =
+        `<div class="state-box" style="grid-column:1/-1">
+          <div class="icon">⚠️</div><p>${msg}</p>
+        </div>`;
+    }
+
+    // ── Init ──────────────────────────────────────────────────────────────────
+    function init() {
+      buildPillsSimple('genrePills',  GENRES);
+      buildPillsSimple('kindPills',   KINDS);
+      buildPillsSimple('statusPills', STATUSES);
     }
     init();
   </script>
 </body>
-
 </html>
