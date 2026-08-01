@@ -13,6 +13,57 @@ public class ApiAgregatorShikimoriKodikSearch: ISearchService{
     private string _kodikSearchURL;
     private string _kodikSearchListURL;
 
+    private static readonly Dictionary<string, string> GenreMap = new(StringComparer.OrdinalIgnoreCase) {
+        ["Экшен"]                = "1-Action",
+        ["Экшн"]                 = "1-Action",
+        ["Приключения"]          = "2-Adventure",
+        ["Машины"]               = "3-Cars",
+        ["Комедия"]              = "4-Comedy",
+        ["Безумие"]              = "5-Dementia",
+        ["Демоны"]               = "6-Demons",
+        ["Детектив"]             = "7-Mystery",
+        ["Драма"]                = "8-Drama",
+        ["Этти"]                 = "9-Ecchi",
+        ["Фэнтези"]              = "10-Fantasy",
+        ["Игры"]                 = "11-Game",
+        ["Хентай"]               = "12-Hentai",
+        ["Исторический"]         = "13-Historical",
+        ["Ужасы"]                = "14-Horror",
+        ["Детское"]              = "15-Kids",
+        ["Магия"]                = "16-Magic",
+        ["Боевые искусства"]     = "17-Martial Arts",
+        ["Меха"]                 = "18-Mecha",
+        ["Музыка"]               = "19-Music",
+        ["Пародия"]              = "20-Parody",
+        ["Самураи"]              = "21-Samurai",
+        ["Самурайское"]          = "21-Samurai",
+        ["Романтика"]            = "22-Romance",
+        ["Школа"]                = "23-School",
+        ["Фантастика"]           = "24-Sci-Fi",
+        ["Сёдзё"]                = "25-Shoujo",
+        ["Сёдзё-ай"]             = "26-Shoujo Ai",
+        ["Сёнен"]                = "27-Shounen",
+        ["Сёнен-ай"]             = "28-Shounen Ai",
+        ["Космос"]               = "29-Space",
+        ["Спорт"]                = "30-Sports",
+        ["Супер сила"]           = "31-Super Power",
+        ["Вампиры"]              = "32-Vampire",
+        ["Яой"]                  = "33-Yaoi",
+        ["Юри"]                  = "34-Yuri",
+        ["Гарем"]                = "35-Harem",
+        ["Повседневность"]       = "36-Slice of Life",
+        ["Сверхъестественное"]   = "37-Supernatural",
+        ["Военное"]              = "38-Military",
+        ["Полиция"]              = "39-Police",
+        ["Психологическое"]      = "40-Psychological",
+        ["Триллер"]              = "41-Thriller",
+        ["Сэйнэн"]               = "42-Seinen",
+        ["Дзёсей"]               = "43-Josei",
+        ["Эротика"]              = "539-Erotica",
+        ["Работа"]               = "541-Work Life",
+        ["Гурман"]               = "543-Gourmet",
+    };
+
     public ApiAgregatorShikimoriKodikSearch(string kodikToken, string shikimoriURL, string kodikSearchURL, string kodikSearchListURL) {
         _kodikToken = kodikToken;
         _shikimoriURL = shikimoriURL; 
@@ -32,7 +83,9 @@ public class ApiAgregatorShikimoriKodikSearch: ISearchService{
             Season = searchParam.Season,
             Score = searchParam.Score,
             Duration = searchParam.Duration,
-            Genre = searchParam.Genre,
+            Genre = searchParam.Genre != null && GenreMap.TryGetValue(searchParam.Genre, out var genreId)
+                ? genreId
+                : searchParam.Genre,
             GenreV2 = searchParam.GenreV2,
             Studio = searchParam.Studio,
             Franchize = searchParam.Franchize,
@@ -104,6 +157,7 @@ public class ApiAgregatorShikimoriKodikSearch: ISearchService{
 
                 Description     = a.Description,
                 DescriptionHtml = a.DescriptionHtml,
+                Censored        = a.IsCensored,
 
                 EmbedUrl = a.PleerLink,
 

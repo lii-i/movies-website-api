@@ -4,36 +4,55 @@ using Microsoft.AspNetCore.Mvc;
        
         app.MapGet("/search", async (
         [FromServices] ISearchService ApiAgregator,
-        [FromServices] IRepository rep,
-        [FromQuery(Name="title")] string? title,
-        [FromQuery(Name="limit")] int? limit,
-        [FromQuery(Name="minRating")] int? minRating,
-        [FromQuery(Name="duration")] string? duration, 
-        [FromQuery(Name="genres")] string? genres,
-        [FromQuery(Name="mpaaRating")] string? mpaaRating
+        [FromServices] AnimeService animeService,
+        [FromQuery(Name="title")]     string? title,
+        [FromQuery(Name="limit")]     int?    limit,
+        [FromQuery(Name="page")]      int?    page,
+        [FromQuery(Name="minRating")] int?    minRating,
+        [FromQuery(Name="duration")]  string? duration,
+        [FromQuery(Name="genres")]    string? genres,
+        [FromQuery(Name="mpaaRating")]string? mpaaRating,
+        [FromQuery(Name="order")]     string? order,
+        [FromQuery(Name="kind")]      string? kind,
+        [FromQuery(Name="status")]    string? status
         ) =>{
 
             SearchRequestParamDTO searchParam = new SearchRequestParamDTO {
-                Title = title,
-                Limit = limit,
-                Score = minRating,
+                Title    = title,
+                Limit    = limit,
+                Page     = page,
+                Score    = minRating,
                 Duration = duration,
-                Genre = genres,
-                Rating = mpaaRating
+                Genre    = genres,
+                Rating   = mpaaRating,
+                Order    = order,
+                Kind     = kind,
+                Status   = status
             };
 
             SearchResponseDTO responseAPI = await ApiAgregator.SearchAPIAsync(searchParam);
 
-            foreach(var item in responseAPI.Items){
-                await rep.AddOrUpdateAnimeAsync(item);
-            }
+            animeService.AddOrUpdateAnimeAsync(responseAPI);
 
             return TypedResults.Ok(responseAPI);
-
 
         });
 
         return app;
 
     }
+
+    app.MapGet("api/movies/{id}", async(
+    string id,
+    [FromServices] ISearchService ApiAgregator,
+    [FromServices] AnimeService animeService
+    ) => {
+        SearchRequestParamDTO requestParam = new SearchRequestParamDTO {
+            Ids = id
+        };
+
+        SearchResponseDTO responseAPI = await ApiAgregator.SearchAPIAsync(requestParam);
+
+        return TypedResults.Ok(responseAPI);
+    })
 }
