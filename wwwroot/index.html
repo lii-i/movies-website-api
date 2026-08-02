@@ -542,25 +542,26 @@
   <script>
     // ── Data ──────────────────────────────────────────────────────────────────
     const GENRES = [
-      { label: 'Экшн',               value: 'Экшн' },
-      { label: 'Приключения',        value: 'Приключения' },
-      { label: 'Комедия',            value: 'Комедия' },
-      { label: 'Драма',              value: 'Драма' },
-      { label: 'Фэнтези',            value: 'Фэнтези' },
-      { label: 'Ужасы',              value: 'Ужасы' },
-      { label: 'Меха',               value: 'Меха' },
-      { label: 'Музыка',             value: 'Музыка' },
-      { label: 'Мистика',            value: 'Мистика' },
-      { label: 'Романтика',          value: 'Романтика' },
-      { label: 'Фантастика',         value: 'Фантастика' },
-      { label: 'Спорт',              value: 'Спорт' },
-      { label: 'Сверхъестественное', value: 'Сверхъестественное' },
-      { label: 'Триллер',            value: 'Триллер' },
-      { label: 'Психологическое',    value: 'Психологическое' },
-      { label: 'Повседневность',     value: 'Повседневность' },
-      { label: 'Магия',              value: 'Магия' },
-      { label: 'Военное',            value: 'Военное' },
-      { label: 'Самурайское',        value: 'Самурайское' },
+      { label: 'Экшен',              value: '1' },
+      { label: 'Комедия',            value: '4' },
+      { label: 'Драма',              value: '8' },
+      { label: 'Фэнтези',            value: '10' },
+      { label: 'Приключения',        value: '2' },
+      { label: 'Детектив',           value: '7' },
+      { label: 'Ужасы',              value: '14' },
+      { label: 'Меха',               value: '18' },
+      { label: 'Музыка',             value: '19' },
+      { label: 'Мистика',            value: '7' },
+      { label: 'Романтика',          value: '22' },
+      { label: 'Фантастика',         value: '24' },
+      { label: 'Спорт',              value: '30' },
+      { label: 'Сверхъестественное', value: '37' },
+      { label: 'Триллер',            value: '41' },
+      { label: 'Психологическое',    value: '40' },
+      { label: 'Повседневность',     value: '36' },
+      { label: 'Магия',              value: '16' },
+      { label: 'Военное',            value: '38' },
+      { label: 'Самурайское',        value: '21' },
     ];
     const KINDS = [
       { label: 'TV сериал', value: 'tv' },
@@ -577,7 +578,7 @@
     ];
 
     // ── State ─────────────────────────────────────────────────────────────────
-    let activeGenre = '';
+    let activeGenres = [];
     let activeKind  = '';
     let activeStatus = '';
 
@@ -587,7 +588,8 @@
       container.innerHTML = items.map(item => {
         const val   = typeof item === 'string' ? item : item.value;
         const label = typeof item === 'string' ? item : item.label;
-        return `<button class="pill ${getActive() === val ? 'active' : ''}"
+        const isActive = Array.isArray(getActive()) ? getActive().includes(val) : getActive() === val;
+        return `<button class="pill ${isActive ? 'active' : ''}"
           data-val="${val}"
           onclick="selectPill('${containerId}', '${val}', setActive_${containerId})">${label}</button>`;
       }).join('');
@@ -602,27 +604,35 @@
     }
 
     function getActiveFor(id) {
-      if (id === 'genrePills')   return activeGenre;
+      if (id === 'genrePills')   return activeGenres;
       if (id === 'kindPills')    return activeKind;
       if (id === 'statusPills')  return activeStatus;
       return '';
     }
     function setActiveFor(id, val) {
-      if (id === 'genrePills')  activeGenre  = val;
+      if (id === 'genrePills') {
+        const idx = activeGenres.indexOf(val);
+        if (idx > -1) activeGenres.splice(idx, 1);
+        else if (val) activeGenres.push(val);
+      }
       if (id === 'kindPills')   activeKind   = val;
       if (id === 'statusPills') activeStatus = val;
     }
 
     function refreshPills(containerId) {
+      const active = getActiveFor(containerId);
       document.querySelectorAll(`#${containerId} .pill`).forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.val === getActiveFor(containerId));
+        if (Array.isArray(active)) {
+          btn.classList.toggle('active', active.includes(btn.dataset.val));
+        } else {
+          btn.classList.toggle('active', btn.dataset.val === active);
+        }
       });
     }
 
     // Genre pills onclick need a global handler
     function pillClick(containerId, val) {
-      const prev = getActiveFor(containerId);
-      setActiveFor(containerId, prev === val ? '' : val);
+      setActiveFor(containerId, val);
       refreshPills(containerId);
       updateActiveCount();
     }
@@ -649,7 +659,7 @@
     // ── Active filter count ───────────────────────────────────────────────────
     function updateActiveCount() {
       let n = 0;
-      if (activeGenre)  n++;
+      if (activeGenres.length > 0) n += activeGenres.length;
       if (activeKind)   n++;
       if (activeStatus) n++;
       if (document.getElementById('ratingRange').value > 0) n++;
@@ -667,7 +677,8 @@
 
     // ── Reset ─────────────────────────────────────────────────────────────────
     document.getElementById('resetBtn').addEventListener('click', () => {
-      activeGenre = activeKind = activeStatus = '';
+      activeGenres = [];
+      activeKind = activeStatus = '';
       document.getElementById('ratingRange').value = 0;
       document.getElementById('ratingVal').textContent = '0+';
       document.getElementById('ageSelect').value = '';
@@ -699,7 +710,7 @@
       if (limit)        params.set('limit', limit);
       if (rating > 0)   params.set('minRating', rating);
       if (age)          params.set('mpaaRating', age);
-      if (activeGenre)  params.set('genres', activeGenre);
+      if (activeGenres.length > 0) params.set('genres', activeGenres.join(','));
       if (activeKind)   params.set('kind', activeKind);
       if (activeStatus) params.set('status', activeStatus);
       if (sort)         params.set('order', sort);
