@@ -38,10 +38,6 @@ using Microsoft.AspNetCore.Mvc;
 
         });
 
-        return app;
-
-    }
-
     app.MapGet("api/movies/{id}", async(
     string id,
     [FromServices] ISearchService ApiAgregator,
@@ -52,7 +48,33 @@ using Microsoft.AspNetCore.Mvc;
         };
 
         SearchResponseDTO responseAPI = await ApiAgregator.SearchAPIAsync(requestParam);
+        var anime = responseAPI.Items.FirstOrDefault();
 
-        return TypedResults.Ok(responseAPI);
-    })
+        if (anime == null) {
+            return Results.NotFound();
+        }
+
+        return Results.Ok(anime);
+    });
+
+    app.MapGet("api/movies/{id}/related", async(
+    string id,
+    [FromServices] ISearchService ApiAgregator
+    ) => {
+        SearchRequestParamDTO requestParam = new SearchRequestParamDTO {
+            Ids = id
+        };
+
+        SearchResponseDTO responseAPI = await ApiAgregator.SearchAPIAsync(requestParam);
+        var anime = responseAPI.Items.FirstOrDefault();
+
+        if (anime != null && anime.Related != null) {
+            return Results.Ok(anime.Related);
+        }
+
+        return Results.Ok(new List<RelatedAnimeDTO>());
+    });
+
+    return app;
+    }
 }

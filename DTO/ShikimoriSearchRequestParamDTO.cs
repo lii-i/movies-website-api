@@ -60,7 +60,8 @@ public class ShikimoriSearchRequestParamDTO
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public bool? Censored { get; set; }
 
-    [JsonIgnore]
+    [JsonPropertyName("ids")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Ids { get; set; }
 
     [JsonIgnore]

@@ -173,7 +173,13 @@ public class ApiAgregatorShikimoriKodikSearch: ISearchService{
                         Id           = Convert.ToInt32(r.Anime!.Id ?? "0"),
                         Title        = r.Anime.Russian ?? r.Anime.Name ?? string.Empty,
                         RelationKind = r.RelationKind,
-                        RelationText = r.RelationText
+                        RelationText = r.RelationText,
+                        Poster       = r.Anime.Poster?.OriginalUrl,
+                        Rating       = r.Anime.Score,
+                        Year         = r.Anime.AiredOn?.Year,
+                        Duration     = r.Anime.Duration,
+                        Kind         = r.Anime.Kind,
+                        Genre        = r.Anime.Genres?.FirstOrDefault()?.Russian ?? r.Anime.Genres?.FirstOrDefault()?.Name
                     })
                     .ToList()
 
@@ -189,49 +195,45 @@ public class ApiAgregatorShikimoriKodikSearch: ISearchService{
         $search: String, $limit: Int, $rating: RatingString, $page: Int, 
         $order: OrderEnum, $kind: AnimeKindString, $status: AnimeStatusString, $season: SeasonString, 
         $score: Int, $duration: DurationString, $genre: String, 
-        $studio: String, $censored: Boolean
+        $studio: String, $censored: Boolean, $ids: String
     ) {
         animes(
             search: $search, limit: $limit, rating: $rating, page: $page, 
             order: $order, kind: $kind, status: $status, season: $season, 
             score: $score, duration: $duration, genre: $genre, 
-            studio: $studio, censored: $censored
+            studio: $studio, censored: $censored, ids: $ids
         ) {
-            id malId name russian licenseNameRu english japanese synonyms kind rating score status episodes episodesAired duration
-            airedOn { year month day date } 
-            releasedOn { year month day date }
-            url season
+            id malId name russian english japanese synonyms kind rating score status episodes episodesAired duration
+            airedOn { year date } 
+            releasedOn { date }
+            season
             
-            poster { id originalUrl mainUrl }
+            poster { originalUrl mainUrl }
             
-            fansubbers fandubbers licensors createdAt updatedAt nextEpisodeAt isCensored
-            genres { id name russian kind }
-            studios { id name imageUrl }
-            externalLinks { id kind url createdAt updatedAt }
+            isCensored
+            genres { name russian }
+            studios { name }
             
-            screenshots { id originalUrl x166Url x332Url }
-            
-            videos { id url name kind playerUrl imageUrl }
+            screenshots { originalUrl }
             
             personRoles {
-                id rolesRu rolesEn
-                person { id name poster { id mainUrl mainAltUrl } }
+                rolesEn
+                person { name }
             }
             characterRoles {
-                id rolesRu rolesEn
-                character { id name russian poster { id mainUrl mainAltUrl } }
+                rolesEn
+                character { name russian }
             }
-            related {
-                id relationKind relationText
-                anime { id name russian english url }
-                manga { id name russian english url }
-            }
+            [RELATED_QUERY]
             
-            scoresStats { score count }
-            statusesStats { status count }
-            description descriptionHtml descriptionSource
+            description descriptionHtml
         }
-    }";
+    }"
+    .Replace("[RELATED_QUERY]", string.IsNullOrEmpty(searchParamShikimori.Ids) ? "" : @"
+            related {
+                relationKind relationText
+                anime { id name russian kind score duration airedOn { year } poster { originalUrl } genres { name russian } }
+            }");
 
         var payload = new
         {
@@ -243,11 +245,14 @@ public class ApiAgregatorShikimoriKodikSearch: ISearchService{
 
         try
         {
-            var responseFlurl = await _shikimoriURL
+            var rawResponse = await _shikimoriURL
             .WithHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
             .WithHeader("Accept", "application/json")
             .PostJsonAsync(payload)
-            .ReceiveJson<GraphQLResponse<ShikimoriSearchResponseDTO>>();
+            .ReceiveString();
+            
+            var responseFlurl = System.Text.Json.JsonSerializer.Deserialize<GraphQLResponse<ShikimoriSearchResponseDTO>>(rawResponse, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
 
             
            if (responseFlurl.Errors != null && responseFlurl.Errors.Count > 0)
@@ -258,7 +263,6 @@ public class ApiAgregatorShikimoriKodikSearch: ISearchService{
             else
             {
                 responseShikimori = responseFlurl.Data;
-                Console.WriteLine(responseShikimori);
             }
 
             for(int i =0; i< responseShikimori.Animes.Count; i++){
@@ -270,16 +274,13 @@ public class ApiAgregatorShikimoriKodikSearch: ISearchService{
                 
                 if(responseKodik != null && responseKodik.Results != null && responseKodik.Results.Count > 0){
                     responseShikimori.Animes[i].PleerLink = responseKodik.Results[0].Link;
-                }else{
-                    responseShikimori.Animes.RemoveAt(i);
-                    i--;
                 }
             }
 
         }
-        catch (FlurlHttpException ex)
+        catch (FlurlHttpException)
         {
-            Console.WriteLine(ex.Message);
+            // Logging can be added here in the future
         }
         
         return responseShikimori;

@@ -95,13 +95,13 @@
       <div class="card-overlay-meta"><span>${m.year}</span><span>${formatDuration(m.duration)}</span></div>
       <div class="card-overlay-btns"><a href="/movie.html?id=${m.id}" class="btn btn-primary btn-sm" onclick="event.stopPropagation()">▶</a></div>
     </div>
-    <div class="card-info"><div class="card-title">${m.title}</div><div class="card-sub">${m.year} · ${m.genres[0]}</div></div>
+    <div class="card-info"><div class="card-title">${m.title}</div><div class="card-sub">${m.year || ''} · ${(m.genres && m.genres.length) ? m.genres[0] : (m.genre || '')}</div></div>
   </div>`;
     }
 
     function renderMovie(m, related = []) {
-      document.title = `${m.title} (${m.year}) — CineVault`;
-      document.getElementById('pageDesc').content = m.description.slice(0, 150);
+      document.title = `${m.title} (${m.year || ''}) — CineVault`;
+      document.getElementById('pageDesc').content = (m.description || '').slice(0, 150);
       document.getElementById('movieBg').style.backgroundImage = `url(${m.backdrop})`;
 
       const inWl = isInWatchlist(m.id);
@@ -126,19 +126,19 @@
         <h1>${m.title}</h1>
         <div class="original-title">${m.originalTitle} · ${m.year}</div>
         <div class="movie-badges">
-          <span class="badge badge-age">${m.ageRating}</span>
-          ${m.genres.map(g => `<span class="badge badge-genre">${g}</span>`).join('')}
+          <span class="badge badge-age">${m.ageRating || 'N/A'}</span>
+          ${(m.genres || []).map(g => `<span class="badge badge-genre">${g}</span>`).join('')}
         </div>
         <div class="movie-meta-table">
-          <span class="meta-key">Режиссёр</span><span class="meta-val">${m.director}</span>
-          <span class="meta-key">Страна</span><span class="meta-val">${m.country}</span>
-          <span class="meta-key">Год</span><span class="meta-val">${m.year}</span>
+          <span class="meta-key">Режиссёр</span><span class="meta-val">${m.director || 'Неизвестно'}</span>
+          <span class="meta-key">Страна</span><span class="meta-val">${m.country || 'Япония'}</span>
+          <span class="meta-key">Год</span><span class="meta-val">${m.year || '—'}</span>
           <span class="meta-key">Продолжительность</span><span class="meta-val">${formatDuration(m.duration)}</span>
-          <span class="meta-key">Возраст</span><span class="meta-val">${m.ageRating}</span>
-          <span class="meta-key">Жанры</span><span class="meta-val">${m.genres.join(', ')}</span>
-          <span class="meta-key">В главных ролях</span><span class="meta-val">${m.cast.join(', ')}</span>
+          <span class="meta-key">Возраст</span><span class="meta-val">${m.ageRating || '—'}</span>
+          <span class="meta-key">Жанры</span><span class="meta-val">${(m.genres || []).join(', ')}</span>
+          <span class="meta-key">В главных ролях</span><span class="meta-val">${(m.cast || []).join(', ')}</span>
         </div>
-        <p class="movie-desc">${m.description}</p>
+        <p class="movie-desc">${m.description || 'Описание отсутствует.'}</p>
         <div class="movie-actions">
           <a href="#player" class="btn btn-primary">▶ Смотреть</a>
           <button class="btn btn-ghost" id="wlBtn" onclick="toggleWl(${m.id})">${inWl ? '🔖 В списке' : '＋ В список'}</button>
@@ -201,11 +201,14 @@
       if (!id) { document.getElementById('movieContent').innerHTML = '<div class="no-results"><div class="no-results-icon">🎬</div><h2>Фильм не найден</h2><a href="/index.html" class="btn btn-primary" style="margin-top:16px">На главную</a></div>'; return; }
       try {
         const movie = await apiGetMovie(id);
-        if (!movie) { throw new Error('not found'); }
+        if (!movie) { 
+            throw new Error('API вернуло пустой результат (movie is null/undefined). ID: ' + id); 
+        }
         const related = await apiGetRelated(id);
         renderMovie(movie, related);
       } catch (e) {
-        document.getElementById('movieContent').innerHTML = '<div class="no-results"><div class="no-results-icon">🎬</div><h2>Фильм не найден</h2><a href="/index.html" class="btn btn-primary" style="margin-top:16px">На главную</a></div>';
+        console.error("Ошибка при рендере фильма:", e);
+        document.getElementById('movieContent').innerHTML = `<div class="no-results"><div class="no-results-icon">🎬</div><h2>Ошибка при загрузке</h2><p style="color:red;margin-top:10px">${e.message}</p><a href="/index.html" class="btn btn-primary" style="margin-top:16px">На главную</a></div>`;
       }
     }
     loadMovie();

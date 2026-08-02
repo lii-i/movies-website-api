@@ -356,6 +356,18 @@ public class RelatedMediaDTO
 
     [JsonPropertyName("poster")]
     public AnimePosterDTO? Poster { get; set; } 
+
+    [JsonPropertyName("score")]
+    public double? Score { get; set; }
+
+    [JsonPropertyName("airedOn")]
+    public DateInfoDTO? AiredOn { get; set; }
+
+    [JsonPropertyName("duration")]
+    public int? Duration { get; set; }
+
+    [JsonPropertyName("genres")]
+    public List<GraphGenreDTO> Genres { get; set; } = new();
 }
 
 public class GraphVideoDTO
