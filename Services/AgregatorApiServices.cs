@@ -252,8 +252,6 @@ public class ApiAgregatorShikimoriKodikSearch: ISearchService{
             .ReceiveString();
             
             var responseFlurl = System.Text.Json.JsonSerializer.Deserialize<GraphQLResponse<ShikimoriSearchResponseDTO>>(rawResponse, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-
             
            if (responseFlurl.Errors != null && responseFlurl.Errors.Count > 0)
             {
@@ -280,7 +278,7 @@ public class ApiAgregatorShikimoriKodikSearch: ISearchService{
         }
         catch (FlurlHttpException)
         {
-            // Logging can be added here in the future
+            
         }
         
         return responseShikimori;
