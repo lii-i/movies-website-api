@@ -2,9 +2,14 @@ using System;
 using System.Threading.Tasks;
 using Flurl;
 using Flurl.Http;
+using Polly;
+using Polly.Retry;
+using Polly.Timeout;
+using System.Text.Json;
 
 public interface ISearchService{
     public Task<SearchResponseDTO> SearchAPIAsync(SearchRequestParamDTO searchParam);
+    public Task<bool> Ping();
 }
 
 public class ApiAgregatorShikimoriKodikSearch: ISearchService{
@@ -95,7 +100,6 @@ public class ApiAgregatorShikimoriKodikSearch: ISearchService{
         };
 
         ShikimoriSearchResponseDTO shikimoriResponse = await SearchAsync(searchParamShikimori);
-
         return MapToResponseDTO(shikimoriResponse);
     }
 
@@ -188,7 +192,7 @@ public class ApiAgregatorShikimoriKodikSearch: ISearchService{
     }
 
 
-    public async Task<ShikimoriSearchResponseDTO> SearchAsync(ShikimoriSearchRequestParamDTO searchParamShikimori){
+    private async Task<ShikimoriSearchResponseDTO> SearchAsync(ShikimoriSearchRequestParamDTO searchParamShikimori){
 
       string graphqlQuery = @"
     query SearchAnimes(
@@ -245,42 +249,92 @@ public class ApiAgregatorShikimoriKodikSearch: ISearchService{
 
         try
         {
-            var rawResponse = await _shikimoriURL
-            .WithHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
-            .WithHeader("Accept", "application/json")
-            .PostJsonAsync(payload)
-            .ReceiveString();
+            ResiliencePipeline<string> piplinePollysShikimori = new ResiliencePipelineBuilder<string>()
+            .AddRetry(new RetryStrategyOptions<string> {
+                ShouldHandle = new PredicateBuilder<string>().Handle<FlurlHttpException>().Handle<TimeoutRejectedException>(),
+                MaxRetryAttempts = 3,
+                Delay = TimeSpan.FromSeconds(1),
+                BackoffType = DelayBackoffType.Exponential
+            })
+            .AddTimeout(TimeSpan.FromSeconds(3))
+            .Build();
+
+            ResiliencePipeline<KodikSearchResponseDTO> piplinePollysKodik = new ResiliencePipelineBuilder<KodikSearchResponseDTO>()
+            .AddRetry(new RetryStrategyOptions<KodikSearchResponseDTO> {
+                ShouldHandle = new PredicateBuilder<KodikSearchResponseDTO>().Handle<FlurlHttpException>().Handle<TimeoutRejectedException>(),
+                MaxRetryAttempts = 3,
+                Delay = TimeSpan.FromSeconds(1),
+                BackoffType = DelayBackoffType.Exponential
+            })
+            .AddTimeout(TimeSpan.FromSeconds(3))
+            .Build();
+
+            var rawResponse = await piplinePollysShikimori.ExecuteAsync(async cancellationToken => {
+                return await (_shikimoriURL + "/api/graphql")
+                .WithHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+                .WithHeader("Accept", "application/json")
+                .PostJsonAsync(payload, cancellationToken: cancellationToken)
+                .ReceiveString();
+            });
             
+
             var responseFlurl = System.Text.Json.JsonSerializer.Deserialize<GraphQLResponse<ShikimoriSearchResponseDTO>>(rawResponse, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
             
-           if (responseFlurl.Errors != null && responseFlurl.Errors.Count > 0)
-            {
-                string errorMessage = responseFlurl.Errors[0].Message;
-                throw new Exception($"Ошибка GraphQL API Shikimori: {errorMessage}");
-            }
-            else
-            {
-                responseShikimori = responseFlurl.Data;
-            }
+            responseShikimori = responseFlurl.Data;
 
             for(int i =0; i< responseShikimori.Animes.Count; i++){
-                var responseKodik = await _kodikSearchURL
-                .SetQueryParam("token", _kodikToken)
-                .SetQueryParam("shikimori_id", responseShikimori.Animes[i].Id)
-                .GetAsync()
-                .ReceiveJson<KodikSearchResponseDTO>();
-                
+                var responseKodik = await piplinePollysKodik.ExecuteAsync(async cancellationToken => {
+                   return  await _kodikSearchURL
+                    .SetQueryParam("token", _kodikToken)
+                    .SetQueryParam("shikimori_id", responseShikimori.Animes[i].Id)
+                    .GetAsync()
+                    .ReceiveJson<KodikSearchResponseDTO>();
+                });
                 if(responseKodik != null && responseKodik.Results != null && responseKodik.Results.Count > 0){
                     responseShikimori.Animes[i].PleerLink = responseKodik.Results[0].Link;
                 }
             }
-
+            return responseShikimori;
         }
-        catch (FlurlHttpException)
+        catch (Exception e) when (e is FlurlHttpException || e is TimeoutRejectedException || e is JsonException)
         {
-            
+            throw new Exception("Ошибка со стороны Shikimori или Kodik или сети", e);
         }
-        
-        return responseShikimori;
     }
+
+    public async Task<bool> Ping()
+    {
+        ResiliencePipeline pipeline = new ResiliencePipelineBuilder()
+            .AddRetry(new RetryStrategyOptions {
+                ShouldHandle = new PredicateBuilder().Handle<FlurlHttpException>().Handle<TimeoutRejectedException>(),
+                MaxRetryAttempts = 3,
+                Delay = TimeSpan.FromSeconds(1),
+                BackoffType = DelayBackoffType.Exponential
+            })
+            .AddTimeout(TimeSpan.FromSeconds(3))
+            .Build();
+
+        try
+        {
+            await pipeline.ExecuteAsync(async cancellationToken => {
+                await _shikimoriURL
+                    .WithHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+                    .WithHeader("Accept", "application/json")
+                    .GetAsync(cancellationToken: cancellationToken);
+            });
+            
+            await pipeline.ExecuteAsync(async cancellationToken => {
+                await _kodikSearchURL
+                    .WithHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+                    .WithHeader("Accept", "application/json")
+                    .GetAsync(cancellationToken: cancellationToken);
+            });
+            
+            return true;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+    } 
 }
