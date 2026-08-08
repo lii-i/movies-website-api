@@ -316,23 +316,24 @@ public class ApiAgregatorShikimoriKodikSearch: ISearchService{
 
         try
         {
-            await pipeline.ExecuteAsync(async cancellationToken => {
-                await _shikimoriURL
+            IFlurlResponse statusShikimori = await pipeline.ExecuteAsync(async cancellationToken => {
+                return await _shikimoriURL
                     .WithHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
                     .WithHeader("Accept", "application/json")
                     .GetAsync(cancellationToken: cancellationToken);
             });
             
-            await pipeline.ExecuteAsync(async cancellationToken => {
-                await _kodikSearchURL
+            IFlurlResponse statusKodik = await pipeline.ExecuteAsync(async cancellationToken => {
+                return await _kodikSearchURL
+                    .SetQueryParam("token", _kodikToken)
                     .WithHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
                     .WithHeader("Accept", "application/json")
                     .GetAsync(cancellationToken: cancellationToken);
             });
             
-            return true;
+            return statusShikimori.IsSuccess && statusKodik.IsSuccess;
         }
-        catch (Exception)
+        catch (Exception e)
         {
             return false;
         }
