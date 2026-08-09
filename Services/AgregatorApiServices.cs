@@ -331,10 +331,11 @@ public class ApiAgregatorShikimoriKodikSearch: ISearchService{
                     .GetAsync(cancellationToken: cancellationToken);
             });
             
-            return statusShikimori.IsSuccess && statusKodik.IsSuccess;
+            return statusShikimori.ResponseMessage.IsSuccessStatusCode && statusKodik.ResponseMessage.IsSuccessStatusCode;
         }
         catch (Exception e)
         {
+            Console.WriteLine(e.Message);
             return false;
         }
     } 
