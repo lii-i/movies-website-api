@@ -300,6 +300,9 @@ public class ApiAgregatorShikimoriKodikSearch: ISearchService{
         {
             throw new Exception("Ошибка со стороны Shikimori или Kodik или сети", e);
         }
+        catch(Exception e){
+            throw new Exception("Ошибка", e);
+        }
     }
 
     public async Task<bool> Ping()

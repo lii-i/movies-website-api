@@ -11,6 +11,8 @@ public class Program {
             return new ApiAgregatorShikimoriKodikSearch(Config["Tokens:Kodik"], Config["URLs:Shikimori"], Config["URLs:Kodik:Search"], Config["URLs:Kodik:List"]);
         });
         builder.Services.AddScoped<IRepository, Repository>();
+        builder.Services.AddSingleton<ApiHelthService>();
+        builder.Services.AddHostedService<PingApiBackgroundService>();
         builder.Services.AddScoped<AnimeService>();
         var app = builder.Build();
 

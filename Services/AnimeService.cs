@@ -1,21 +1,25 @@
 public class AnimeService
 {
     private readonly IServiceProvider _services;
+    private readonly ApiHelthService _apiHelthService;
 
-    public AnimeService(IServiceProvider Services)
+    public AnimeService(IServiceProvider Services, ApiHelthService apiHelthService)
     {
        _services = Services;
+       _apiHelthService = apiHelthService;
     }
 
     public async Task<SearchResponseDTO> SearchAsync(SearchRequestParamDTO requestParam){
 
-        ISearchService searchService = _services.GetRequiredService<ISearchService>();
-
-        bool ping = await searchService.Ping();
-        if(ping){
-            SearchResponseDTO responseAPI = await searchService.SearchAPIAsync(requestParam);
-            AddOrUpdateAnimeAsync(responseAPI);
-            return responseAPI;
+        if(_apiHelthService.Helth){
+            try{
+                ISearchService searchService = _services.GetRequiredService<ISearchService>();
+                SearchResponseDTO responseAPI = await searchService.SearchAPIAsync(requestParam);
+                AddOrUpdateAnimeAsync(responseAPI); // не await чтобы не ждать обновления бд. Клиенту это не нужно
+                return responseAPI;
+            }catch(Exception e){
+                return await DbGetAnimeByFiltersAsync(requestParam);
+            }
         }
         
         return await DbGetAnimeByFiltersAsync(requestParam);
