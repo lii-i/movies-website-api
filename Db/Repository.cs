@@ -5,6 +5,7 @@ public interface IRepository
     Task AddOrUpdateAnimeAsync(AnimeResponseDTO anime);
     Task<AnimeEntity?> GetAnimeByIdAsync(int id);
     Task<List<AnimeEntity>> GetAnimeByFiltersAsync(SearchRequestParamDTO param);
+    public Task AddUserAsync(RegisterData regData);
 }
 
 public class Repository : IRepository
@@ -21,11 +22,13 @@ public class Repository : IRepository
 
     public async Task AddOrUpdateAnimeAsync(AnimeResponseDTO anime)
     {
-        AnimeEntity? existing = await _db.Animes.FirstOrDefaultAsync(a => a.Id == anime.Id);
+        AnimeEntity? existing = await _db.Animes.FindAsync(anime.Id);
 
         if (existing == null)
         {
+            _db.ChangeTracker.AutoDetectChangesEnabled = false;
             _db.Animes.Add(MapToEntity(anime));
+            _db.ChangeTracker.AutoDetectChangesEnabled = true;
         }
         else
         {
@@ -37,7 +40,7 @@ public class Repository : IRepository
 
     public async Task<AnimeEntity?> GetAnimeByIdAsync(int id)
     {
-        return await _db.Animes.FirstOrDefaultAsync(a => a.Id == id);
+        return await _db.Animes.AsNoTracking().FirstOrDefaultAsync(a => a.Id == id);
     }
 
     public async Task<List<AnimeEntity>> GetAnimeByFiltersAsync(SearchRequestParamDTO param)
@@ -141,7 +144,7 @@ public class Repository : IRepository
             }
         }
 
-        return await query.ToListAsync();
+        return await query.AsNoTracking().ToListAsync();
     }
 
     private static AnimeEntity MapToEntity(AnimeResponseDTO dto) => new()
@@ -211,5 +214,23 @@ public class Repository : IRepository
         entity.EmbedUrl        = dto.EmbedUrl;
         entity.Screenshots     = dto.Screenshots;
         entity.Related         = dto.Related;
+    }
+
+    public async Task AddUserAsync(RegisterData regData){
+
+        bool check = await GetUserByEmail(regData.Email);
+        if(check) throw new ArgumentException("Пользователь с таким Email уже существует.");
+
+        _db.Users.Add(new UsersEntity {Email = regData.Email, Password = regData.Password, AvatarPath = ""});
+        
+        await _db.SaveChangesAsync();
+    }
+
+    public async Task<bool> GetUserByEmail(string Email){
+        UsersEntity user = await _db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Email == Email);
+
+        if(user == null) return false;
+
+        return true;
     }
 }

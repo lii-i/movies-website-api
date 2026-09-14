@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
         public static WebApplication AddMoviesEndPoints(this WebApplication app){
        
         app.MapGet("/search", async (
-        [FromServices] ISearchService ApiAgregator,
         [FromServices] AnimeService animeService,
         [FromQuery(Name="title")]     string? title,
         [FromQuery(Name="limit")]     int?    limit,
@@ -30,9 +29,7 @@ using Microsoft.AspNetCore.Mvc;
                 Status   = status
             };
 
-            SearchResponseDTO responseAPI = await ApiAgregator.SearchAPIAsync(searchParam);
-
-            animeService.AddOrUpdateAnimeAsync(responseAPI);
+            SearchResponseDTO responseAPI = await animeService.SearchAsync(searchParam);
 
             return TypedResults.Ok(responseAPI);
 
@@ -40,14 +37,13 @@ using Microsoft.AspNetCore.Mvc;
 
     app.MapGet("api/movies/{id}", async(
     string id,
-    [FromServices] ISearchService ApiAgregator,
     [FromServices] AnimeService animeService
     ) => {
         SearchRequestParamDTO requestParam = new SearchRequestParamDTO {
             Ids = id
         };
 
-        SearchResponseDTO responseAPI = await ApiAgregator.SearchAPIAsync(requestParam);
+        SearchResponseDTO responseAPI = await animeService.SearchAsync(requestParam);
         var anime = responseAPI.Items.FirstOrDefault();
 
         if (anime == null) {
@@ -59,13 +55,13 @@ using Microsoft.AspNetCore.Mvc;
 
     app.MapGet("api/movies/{id}/related", async(
     string id,
-    [FromServices] ISearchService ApiAgregator
+    [FromServices] AnimeService animeService
     ) => {
         SearchRequestParamDTO requestParam = new SearchRequestParamDTO {
             Ids = id
         };
 
-        SearchResponseDTO responseAPI = await ApiAgregator.SearchAPIAsync(requestParam);
+        SearchResponseDTO responseAPI = await animeService.SearchAsync(requestParam);
         var anime = responseAPI.Items.FirstOrDefault();
 
         if (anime != null && anime.Related != null) {
@@ -75,6 +71,21 @@ using Microsoft.AspNetCore.Mvc;
         return Results.Ok(new List<RelatedAnimeDTO>());
     });
 
+    app.MapPost("api/auth/register", async(
+        [FromBody] RegisterData regData,
+        [FromServices] UserService userService
+    ) => {
+
+        StatusReg statusReg = await userService.RegisterAsync(regData);
+
+        if(statusReg == StatusReg.ErrorData) return Results.BadRequest();
+        if(statusReg == StatusReg.ErrorDublicate) return Results.Conflict();
+
+        return Results.Ok();
+        
+    });
+
     return app;
     }
+    
 }

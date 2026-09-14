@@ -14,6 +14,7 @@ public class Program {
         builder.Services.AddSingleton<ApiHelthService>();
         builder.Services.AddHostedService<PingApiBackgroundService>();
         builder.Services.AddScoped<AnimeService>();
+        builder.Services.AddScoped<UserService>();
         var app = builder.Build();
 
         using (var scope = app.Services.CreateScope()){
